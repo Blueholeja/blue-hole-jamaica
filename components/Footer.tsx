@@ -94,7 +94,8 @@ export default function Footer() {
             <ul className="space-y-2">
               {[
                 { href: '/', label: 'Home' },
-                { href: '/attractions', label: 'Attractions' },
+                { href: '/attractions', label: 'Services' },
+                { href: '/excursions', label: 'Excursions' },
                 { href: '/about', label: 'About Us' },
                 { href: '/gallery', label: 'Gallery' },
                 { href: '/faq', label: 'FAQ' },
@@ -121,7 +122,7 @@ export default function Footer() {
                 { href: '/attractions/blue-hole', label: 'Blue Hole' },
                 { href: '/attractions/dunns-river-falls', label: "Dunn's River Falls" },
                 { href: '/attractions/wabbas-weed-adventure', label: "Wabba's Weed Adventure" },
-                { href: '/attractions/custom-day-tours', label: 'Custom Day Tours' },
+                { href: '/attractions/custom-attractions', label: 'Custom Attractions' },
                 { href: '/attractions/airport-pickup', label: 'Airport Pickup' },
                 { href: '/attractions/blue-hole-overnight', label: 'Overnight Stays' },
               ].map((link) => (
@@ -183,6 +184,23 @@ export default function Footer() {
             </Link>
           </div>
         </div>
+
+        {/* Photo Credits */}
+        <p className="mt-4 text-xs text-gray-600 text-center sm:text-left">
+          Photo credits:{' '}
+          <a href="https://commons.wikimedia.org/wiki/File:Divers_at_Ricks_Cafe_in_Negril_-_panoramio.jpg" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 underline">
+            Alfred Moya
+          </a>{' '}
+          (CC BY 3.0),{' '}
+          <a href="https://commons.wikimedia.org/wiki/File:Black_River_%E2%80%93_Boot_mit_Safari-G%C3%A4sten_auf_dem_Black_River_(1998).jpg" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 underline">
+            ingostrutz/Letterix
+          </a>{' '}
+          (CC BY-SA 3.0), and{' '}
+          <a href="https://commons.wikimedia.org/wiki/File:Hope_Road_Jamaika2.jpg" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 underline">
+            Hitachi-Hu
+          </a>{' '}
+          (CC BY-SA 4.0) via Wikimedia Commons.
+        </p>
       </div>
     </footer>
   )

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ViewTransition } from 'react'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
@@ -31,7 +32,9 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          <ViewTransition default="page-transition">{children}</ViewTransition>
+        </main>
         <Footer />
         <WhatsAppButton />
       </body>

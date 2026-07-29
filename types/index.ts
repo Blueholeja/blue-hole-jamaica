@@ -21,6 +21,7 @@ export interface Booking {
   date: string
   guests: number
   special_requests?: string
+  decline_reason?: string
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
   payment_status: 'unpaid' | 'paid' | 'refunded'
   payment_id?: string

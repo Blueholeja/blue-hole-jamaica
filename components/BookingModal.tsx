@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as Dialog from '@radix-ui/react-dialog'
-import { X, Calendar, Users, MapPin } from 'lucide-react'
+import { X, Calendar, Users, MapPin, Plane } from 'lucide-react'
 import { TOURS } from '@/lib/tours-data'
 import { cn } from '@/lib/utils'
 
@@ -17,15 +17,33 @@ export default function BookingModal({ children, defaultTourSlug }: BookingModal
   const [open, setOpen] = useState(false)
   const [tourSlug, setTourSlug] = useState(defaultTourSlug || '')
   const [date, setDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [destination, setDestination] = useState('')
+  const [arrivalFlight, setArrivalFlight] = useState('')
+  const [departureDate, setDepartureDate] = useState('')
+  const [departureFlight, setDepartureFlight] = useState('')
+  const [address, setAddress] = useState('')
   const [guests, setGuests] = useState(1)
 
   const today = new Date().toISOString().split('T')[0]
+  const isCustom = tourSlug === 'custom-attractions'
+  const isRoundTrip = tourSlug === 'round-trip-transfers'
+  const isPickup = tourSlug === 'airport-pickup'
+  const isDropoff = tourSlug === 'airport-dropoff'
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const params = new URLSearchParams()
     if (tourSlug) params.set('tour', tourSlug)
     if (date) params.set('date', date)
+    if (isCustom && endDate) params.set('end', endDate)
+    if (isCustom && destination) params.set('destination', destination)
+    if (isRoundTrip && arrivalFlight) params.set('arrivalFlight', arrivalFlight)
+    if (isRoundTrip && departureDate) params.set('departureDate', departureDate)
+    if (isRoundTrip && departureFlight) params.set('departureFlight', departureFlight)
+    if ((isRoundTrip || isPickup || isDropoff) && address) params.set('address', address)
+    if (isPickup && arrivalFlight) params.set('arrivalFlight', arrivalFlight)
+    if (isDropoff && departureFlight) params.set('departureFlight', departureFlight)
     params.set('guests', String(guests))
     setOpen(false)
     router.push(`/book?${params.toString()}`)
@@ -48,41 +66,273 @@ export default function BookingModal({ children, defaultTourSlug }: BookingModal
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Tour Selection */}
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
-                <MapPin size={16} className="text-[#00B896]" />
-                Select Tour
-              </label>
-              <select
-                value={tourSlug}
-                onChange={(e) => setTourSlug(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
-              >
-                <option value="">Choose a tour...</option>
-                {TOURS.filter((t) => t.available).map((tour) => (
-                  <option key={tour.slug} value={tour.slug}>
-                    {tour.name} — ${tour.price}/person
-                  </option>
-                ))}
-              </select>
-            </div>
+            {!isCustom && !isRoundTrip && !isPickup && !isDropoff && (
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                  <MapPin size={16} className="text-[#00B896]" />
+                  Select Tour
+                </label>
+                <select
+                  value={tourSlug}
+                  onChange={(e) => setTourSlug(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                >
+                  <option value="">Choose a tour...</option>
+                  {TOURS.filter((t) => t.available).map((tour) => (
+                    <option key={tour.slug} value={tour.slug}>
+                      {tour.name} — ${tour.price}/person
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {isCustom && (
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                  <MapPin size={16} className="text-[#00B896]" />
+                  Where would you like to go?
+                </label>
+                <textarea
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  required
+                  rows={2}
+                  placeholder="Tell us the places you'd like to visit..."
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent resize-none"
+                />
+              </div>
+            )}
+
+            {/* Round Trip fields */}
+            {isRoundTrip && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Calendar size={16} className="text-[#00B896]" />
+                      Arrival Date
+                    </label>
+                    <input
+                      type="date"
+                      value={date}
+                      min={today}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Plane size={16} className="text-[#00B896]" />
+                      Arrival Flight #
+                    </label>
+                    <input
+                      type="text"
+                      value={arrivalFlight}
+                      onChange={(e) => setArrivalFlight(e.target.value)}
+                      required
+                      placeholder="e.g. AA1234"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Calendar size={16} className="text-[#00B896]" />
+                      Departure Date
+                    </label>
+                    <input
+                      type="date"
+                      value={departureDate}
+                      min={date || today}
+                      onChange={(e) => setDepartureDate(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Plane size={16} className="text-[#00B896]" />
+                      Departure Flight #
+                    </label>
+                    <input
+                      type="text"
+                      value={departureFlight}
+                      onChange={(e) => setDepartureFlight(e.target.value)}
+                      required
+                      placeholder="e.g. AA5678"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                    <MapPin size={16} className="text-[#00B896]" />
+                    Accommodation Address
+                  </label>
+                  <textarea
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                    rows={2}
+                    placeholder="Hotel or villa name and address"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent resize-none"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Airport Pickup fields */}
+            {isPickup && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Calendar size={16} className="text-[#00B896]" />
+                      Arrival Date
+                    </label>
+                    <input
+                      type="date"
+                      value={date}
+                      min={today}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Plane size={16} className="text-[#00B896]" />
+                      Arrival Flight #
+                    </label>
+                    <input
+                      type="text"
+                      value={arrivalFlight}
+                      onChange={(e) => setArrivalFlight(e.target.value)}
+                      required
+                      placeholder="e.g. AA1234"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                    <MapPin size={16} className="text-[#00B896]" />
+                    Drop-off Address
+                  </label>
+                  <textarea
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                    rows={2}
+                    placeholder="Hotel or villa name and address"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent resize-none"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Airport Drop-Off fields */}
+            {isDropoff && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Calendar size={16} className="text-[#00B896]" />
+                      Departure Date
+                    </label>
+                    <input
+                      type="date"
+                      value={date}
+                      min={today}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                      <Plane size={16} className="text-[#00B896]" />
+                      Departure Flight #
+                    </label>
+                    <input
+                      type="text"
+                      value={departureFlight}
+                      onChange={(e) => setDepartureFlight(e.target.value)}
+                      required
+                      placeholder="e.g. AA5678"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                    <MapPin size={16} className="text-[#00B896]" />
+                    Pickup Address
+                  </label>
+                  <textarea
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                    rows={2}
+                    placeholder="Hotel or villa name and address"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent resize-none"
+                  />
+                </div>
+              </>
+            )}
 
             {/* Date */}
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
-                <Calendar size={16} className="text-[#00B896]" />
-                Preferred Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                min={today}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
-              />
-            </div>
+            {isCustom ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                    <Calendar size={16} className="text-[#00B896]" />
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={date}
+                    min={today}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                    <Calendar size={16} className="text-[#00B896]" />
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    min={date || today}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    required
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                  />
+                </div>
+              </div>
+            ) : !isRoundTrip && !isPickup && !isDropoff && (
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5">
+                  <Calendar size={16} className="text-[#00B896]" />
+                  Preferred Date
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  min={today}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+                />
+              </div>
+            )}
 
             {/* Guests */}
             <div>

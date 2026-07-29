@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Filter, RefreshCw } from 'lucide-react'
+import { Filter, RefreshCw, Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type BookingStatus = 'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed'
@@ -17,6 +17,7 @@ interface Booking {
   status: string
   payment_status: string
   special_requests: string
+  decline_reason?: string
   created_at: string
   tours?: { name: string }
 }
@@ -47,6 +48,9 @@ export default function AdminBookingsPage() {
   const [filter, setFilter] = useState<BookingStatus>('all')
   const [loading, setLoading] = useState(true)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [decliningBooking, setDecliningBooking] = useState<Booking | null>(null)
+  const [declineReason, setDeclineReason] = useState('')
+  const [isDeclining, setIsDeclining] = useState(false)
 
   async function fetchBookings() {
     setLoading(true)
@@ -70,6 +74,23 @@ export default function AdminBookingsPage() {
       body: JSON.stringify({ status }),
     })
     await fetchBookings()
+  }
+
+  async function confirmDecline() {
+    if (!decliningBooking || !declineReason.trim()) return
+    setIsDeclining(true)
+    try {
+      await fetch(`/api/bookings/${decliningBooking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled', decline_reason: declineReason.trim() }),
+      })
+      await fetchBookings()
+      setDecliningBooking(null)
+      setDeclineReason('')
+    } finally {
+      setIsDeclining(false)
+    }
   }
 
   useEffect(() => {
@@ -146,18 +167,40 @@ export default function AdminBookingsPage() {
                       ${booking.total_amount?.toFixed(2)}
                     </td>
                     <td className="px-4 py-3">
-                      <select
-                        value={booking.status}
-                        onChange={(e) => updateStatus(booking.id, e.target.value)}
-                        className={cn(
-                          'text-xs font-medium px-2 py-1 rounded-full border-0 focus:ring-1 focus:ring-[#00B896] cursor-pointer',
-                          STATUS_COLORS[booking.status] || 'bg-gray-100 text-gray-600'
-                        )}
-                      >
-                        {['pending', 'confirmed', 'cancelled', 'completed'].map((s) => (
-                          <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-                        ))}
-                      </select>
+                      {booking.status === 'pending' ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateStatus(booking.id, 'confirmed')}
+                            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                          >
+                            <Check size={13} />
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDecliningBooking(booking)
+                              setDeclineReason('')
+                            }}
+                            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                          >
+                            <X size={13} />
+                            Decline
+                          </button>
+                        </div>
+                      ) : (
+                        <select
+                          value={booking.status}
+                          onChange={(e) => updateStatus(booking.id, e.target.value)}
+                          className={cn(
+                            'text-xs font-medium px-2 py-1 rounded-full border-0 focus:ring-1 focus:ring-[#00B896] cursor-pointer',
+                            STATUS_COLORS[booking.status] || 'bg-gray-100 text-gray-600'
+                          )}
+                        >
+                          {['pending', 'confirmed', 'cancelled', 'completed'].map((s) => (
+                            <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                          ))}
+                        </select>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={cn('text-xs font-medium px-2 py-1 rounded-full', PAYMENT_COLORS[booking.payment_status] || 'bg-gray-100 text-gray-600')}>
@@ -203,6 +246,9 @@ export default function AdminBookingsPage() {
                 ['Status', selectedBooking.status],
                 ['Payment', selectedBooking.payment_status],
                 ['Special Requests', selectedBooking.special_requests || 'None'],
+                ...(selectedBooking.decline_reason
+                  ? [['Decline Reason', selectedBooking.decline_reason]]
+                  : []),
               ].map(([label, value]) => (
                 <div key={label as string} className="flex justify-between py-2 border-b border-gray-50">
                   <span className="text-gray-400">{label}</span>
@@ -216,6 +262,47 @@ export default function AdminBookingsPage() {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Decline Reason Modal */}
+      {decliningBooking && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => !isDeclining && setDecliningBooking(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-bold text-[#1B3A2D] text-lg mb-1">Decline Request</h3>
+            <p className="text-gray-500 text-sm mb-4">
+              Let {decliningBooking.customer_name} know why, so they can reschedule or choose another excursion.
+            </p>
+            <textarea
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              rows={4}
+              placeholder="e.g. We're unable to accommodate those dates — fully booked. Please try a different date range."
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent resize-none"
+            />
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => setDecliningBooking(null)}
+                disabled={isDeclining}
+                className="flex-1 border border-gray-200 hover:border-gray-300 text-gray-600 font-semibold py-2.5 rounded-xl transition-colors text-sm disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDecline}
+                disabled={isDeclining || !declineReason.trim()}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm disabled:opacity-50"
+              >
+                {isDeclining ? 'Declining...' : 'Confirm Decline'}
+              </button>
+            </div>
           </div>
         </div>
       )}

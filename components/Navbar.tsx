@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils'
 
 const navLinks = [
   { href: '/', label: 'Home' },
-  { href: '/#services', label: 'Services' },
-  { href: '/attractions', label: 'Attractions' },
+  { href: '/excursions', label: 'Excursions' },
+  { href: '/attractions', label: 'Services' },
   { href: '/about', label: 'About Us' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/faq', label: 'FAQ' },
@@ -29,6 +29,7 @@ export default function Navbar() {
 
   return (
     <header
+      style={{ viewTransitionName: 'site-header' }}
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         'bg-[#1B3A2D]',

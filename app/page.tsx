@@ -59,19 +59,19 @@ const SERVICES = [
     icon: <Plane className="w-7 h-7 text-[#00B896]" />,
     title: 'Airport Transfers',
     description: 'Reliable pickup & drop-off anywhere in Jamaica.',
-    href: '/attractions?category=airport_transfer',
+    href: '/attractions',
   },
   {
     icon: <Map className="w-7 h-7 text-[#00B896]" />,
     title: 'Day Trips & Tours',
     description: 'Explore the best attractions across the island.',
-    href: '/attractions?category=day_tour',
+    href: '/excursions',
   },
   {
     icon: <Hotel className="w-7 h-7 text-[#00B896]" />,
     title: 'Overnight Stays',
     description: 'Stay overnight at the beautiful Blue Hole.',
-    href: '/attractions?category=overnight',
+    href: '/attractions/blue-hole-overnight',
   },
   {
     icon: <Shield className="w-7 h-7 text-[#00B896]" />,
@@ -82,7 +82,7 @@ const SERVICES = [
 ]
 
 const popularTours = TOURS.filter((t) =>
-  ['blue-hole', 'wabbas-weed-adventure', 'dunns-river-falls', 'custom-day-tours'].includes(t.slug)
+  ['blue-hole', 'wabbas-weed-adventure', 'dunns-river-falls', 'custom-attractions'].includes(t.slug)
 )
 
 export default function HomePage() {
@@ -167,13 +167,13 @@ export default function HomePage() {
               <p className="text-[#00B896] text-xs font-bold uppercase tracking-widest mb-2">
                 Explore the Best of Jamaica
               </p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1B3A2D]">Popular Attractions</h2>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1B3A2D]">Popular Excursions</h2>
             </div>
             <Link
-              href="/attractions"
+              href="/excursions"
               className="hidden sm:inline-flex items-center gap-1 text-[#00B896] hover:text-[#009B7F] text-sm font-semibold transition-colors shrink-0"
             >
-              View All Attractions <ArrowRight size={15} />
+              View All Excursions <ArrowRight size={15} />
             </Link>
           </div>
 
@@ -221,8 +221,8 @@ export default function HomePage() {
           </div>
 
           <div className="sm:hidden text-center mt-6">
-            <Link href="/attractions" className="inline-flex items-center gap-1 text-[#00B896] font-semibold text-sm">
-              View All Attractions <ArrowRight size={15} />
+            <Link href="/excursions" className="inline-flex items-center gap-1 text-[#00B896] font-semibold text-sm">
+              View All Excursions <ArrowRight size={15} />
             </Link>
           </div>
         </div>

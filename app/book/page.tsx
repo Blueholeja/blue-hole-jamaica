@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { PayPalScriptProvider } from '@paypal/react-paypal-js'
-import { CheckCircle, AlertCircle, ChevronRight, Calendar, Users, User, Mail, Phone, FileText } from 'lucide-react'
+import { CheckCircle, AlertCircle, ChevronRight, Calendar, Users, User, Mail, Phone, FileText, MapPin, Plane } from 'lucide-react'
 import { TOURS } from '@/lib/tours-data'
 import PayPalButton from '@/components/PayPalButton'
 import { cn } from '@/lib/utils'
@@ -25,6 +25,12 @@ function BookingPageContent() {
   const [step, setStep] = useState(1)
   const [selectedTourSlug, setSelectedTourSlug] = useState(searchParams.get('tour') || '')
   const [date, setDate] = useState(searchParams.get('date') || '')
+  const [endDate, setEndDate] = useState(searchParams.get('end') || '')
+  const [destination, setDestination] = useState(searchParams.get('destination') || '')
+  const [arrivalFlight, setArrivalFlight] = useState(searchParams.get('arrivalFlight') || '')
+  const [departureDate, setDepartureDate] = useState(searchParams.get('departureDate') || '')
+  const [departureFlight, setDepartureFlight] = useState(searchParams.get('departureFlight') || '')
+  const [address, setAddress] = useState(searchParams.get('address') || '')
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 1)
   const [personalData, setPersonalData] = useState<BookingFormData | null>(null)
   const [bookingId, setBookingId] = useState<string | null>(null)
@@ -33,6 +39,11 @@ function BookingPageContent() {
 
   const today = new Date().toISOString().split('T')[0]
   const selectedTour = TOURS.find((t) => t.slug === selectedTourSlug)
+  const isCustom = selectedTourSlug === 'custom-attractions'
+  const isRoundTrip = selectedTourSlug === 'round-trip-transfers'
+  const isPickup = selectedTourSlug === 'airport-pickup'
+  const isDropoff = selectedTourSlug === 'airport-dropoff'
+  const steps = isCustom ? ['Select Tour', 'Your Details', 'Review & Submit'] : STEPS
   const totalAmount = selectedTour ? selectedTour.price * guests : 0
 
   const {
@@ -43,6 +54,41 @@ function BookingPageContent() {
 
   async function createBooking(paymentId?: string): Promise<string> {
     if (!selectedTour || !personalData) throw new Error('Missing booking data')
+    const specialRequests = isCustom
+      ? [
+          `Destination: ${destination}`,
+          `Dates: ${date} to ${endDate}`,
+          personalData.special_requests,
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : isRoundTrip
+      ? [
+          `Arrival: ${date} (Flight ${arrivalFlight})`,
+          `Departure: ${departureDate} (Flight ${departureFlight})`,
+          `Accommodation: ${address}`,
+          personalData.special_requests,
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : isPickup
+      ? [
+          `Arrival: ${date} (Flight ${arrivalFlight})`,
+          `Drop-off Address: ${address}`,
+          personalData.special_requests,
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : isDropoff
+      ? [
+          `Departure: ${date} (Flight ${departureFlight})`,
+          `Pickup Address: ${address}`,
+          personalData.special_requests,
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : personalData.special_requests
+
     const res = await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -53,7 +99,7 @@ function BookingPageContent() {
         phone: personalData.phone,
         date,
         guests,
-        special_requests: personalData.special_requests,
+        special_requests: specialRequests,
         total_amount: totalAmount,
         payment_id: paymentId,
         payment_status: paymentId ? 'paid' : 'unpaid',
@@ -68,6 +114,10 @@ function BookingPageContent() {
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault()
     if (!selectedTourSlug || !date || guests < 1) return
+    if (isCustom && (!endDate || !destination.trim())) return
+    if (isRoundTrip && (!arrivalFlight.trim() || !departureDate || !departureFlight.trim() || !address.trim())) return
+    if (isPickup && (!arrivalFlight.trim() || !address.trim())) return
+    if (isDropoff && (!departureFlight.trim() || !address.trim())) return
     setStep(2)
   }
 
@@ -89,6 +139,20 @@ function BookingPageContent() {
     }
   }
 
+  async function handleSubmitRequest() {
+    setIsCreatingBooking(true)
+    setPaymentError(null)
+    try {
+      const id = await createBooking()
+      setBookingId(id)
+      router.push(`/book/confirmation/${id}?custom=1`)
+    } catch (err) {
+      setPaymentError('Something went wrong submitting your request. Please try again or contact us directly.')
+    } finally {
+      setIsCreatingBooking(false)
+    }
+  }
+
   const inputClass = 'w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent'
   const labelClass = 'flex items-center gap-2 text-sm font-medium text-gray-700 mb-1.5'
 
@@ -100,7 +164,7 @@ function BookingPageContent() {
           <h1 className="text-3xl font-bold text-white text-center mb-6">Book Your Tour</h1>
           {/* Step Indicator */}
           <div className="flex items-center justify-center gap-0">
-            {STEPS.map((s, idx) => {
+            {steps.map((s, idx) => {
               const stepNum = idx + 1
               const isActive = step === stepNum
               const isCompleted = step > stepNum
@@ -122,7 +186,7 @@ function BookingPageContent() {
                       {s}
                     </span>
                   </div>
-                  {idx < STEPS.length - 1 && (
+                  {idx < steps.length - 1 && (
                     <div className={cn(
                       'w-16 sm:w-24 h-0.5 mx-2 transition-all',
                       step > stepNum ? 'bg-[#00B896]' : 'bg-white/20'
@@ -164,20 +228,241 @@ function BookingPageContent() {
                     </select>
                   </div>
 
-                  <div>
-                    <label className={labelClass}>
-                      <Calendar size={16} className="text-[#00B896]" />
-                      Date *
-                    </label>
-                    <input
-                      type="date"
-                      value={date}
-                      min={today}
-                      onChange={(e) => setDate(e.target.value)}
-                      required
-                      className={inputClass}
-                    />
-                  </div>
+                  {isCustom ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>
+                          <Calendar size={16} className="text-[#00B896]" />
+                          Start Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={date}
+                          min={today}
+                          onChange={(e) => setDate(e.target.value)}
+                          required
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          <Calendar size={16} className="text-[#00B896]" />
+                          End Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={endDate}
+                          min={date || today}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          required
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  ) : isRoundTrip ? (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>
+                            <Calendar size={16} className="text-[#00B896]" />
+                            Arrival Date *
+                          </label>
+                          <input
+                            type="date"
+                            value={date}
+                            min={today}
+                            onChange={(e) => setDate(e.target.value)}
+                            required
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>
+                            <Plane size={16} className="text-[#00B896]" />
+                            Arrival Flight # *
+                          </label>
+                          <input
+                            type="text"
+                            value={arrivalFlight}
+                            onChange={(e) => setArrivalFlight(e.target.value)}
+                            required
+                            placeholder="e.g. AA1234"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>
+                            <Calendar size={16} className="text-[#00B896]" />
+                            Departure Date *
+                          </label>
+                          <input
+                            type="date"
+                            value={departureDate}
+                            min={date || today}
+                            onChange={(e) => setDepartureDate(e.target.value)}
+                            required
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>
+                            <Plane size={16} className="text-[#00B896]" />
+                            Departure Flight # *
+                          </label>
+                          <input
+                            type="text"
+                            value={departureFlight}
+                            onChange={(e) => setDepartureFlight(e.target.value)}
+                            required
+                            placeholder="e.g. AA5678"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          <MapPin size={16} className="text-[#00B896]" />
+                          Accommodation Address *
+                        </label>
+                        <textarea
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          required
+                          rows={2}
+                          placeholder="Hotel or villa name and address"
+                          className={cn(inputClass, 'resize-none')}
+                        />
+                      </div>
+                    </>
+                  ) : isPickup ? (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>
+                            <Calendar size={16} className="text-[#00B896]" />
+                            Arrival Date *
+                          </label>
+                          <input
+                            type="date"
+                            value={date}
+                            min={today}
+                            onChange={(e) => setDate(e.target.value)}
+                            required
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>
+                            <Plane size={16} className="text-[#00B896]" />
+                            Arrival Flight # *
+                          </label>
+                          <input
+                            type="text"
+                            value={arrivalFlight}
+                            onChange={(e) => setArrivalFlight(e.target.value)}
+                            required
+                            placeholder="e.g. AA1234"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          <MapPin size={16} className="text-[#00B896]" />
+                          Drop-off Address *
+                        </label>
+                        <textarea
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          required
+                          rows={2}
+                          placeholder="Hotel or villa name and address"
+                          className={cn(inputClass, 'resize-none')}
+                        />
+                      </div>
+                    </>
+                  ) : isDropoff ? (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>
+                            <Calendar size={16} className="text-[#00B896]" />
+                            Departure Date *
+                          </label>
+                          <input
+                            type="date"
+                            value={date}
+                            min={today}
+                            onChange={(e) => setDate(e.target.value)}
+                            required
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>
+                            <Plane size={16} className="text-[#00B896]" />
+                            Departure Flight # *
+                          </label>
+                          <input
+                            type="text"
+                            value={departureFlight}
+                            onChange={(e) => setDepartureFlight(e.target.value)}
+                            required
+                            placeholder="e.g. AA5678"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          <MapPin size={16} className="text-[#00B896]" />
+                          Pickup Address *
+                        </label>
+                        <textarea
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          required
+                          rows={2}
+                          placeholder="Hotel or villa name and address"
+                          className={cn(inputClass, 'resize-none')}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className={labelClass}>
+                        <Calendar size={16} className="text-[#00B896]" />
+                        Date *
+                      </label>
+                      <input
+                        type="date"
+                        value={date}
+                        min={today}
+                        onChange={(e) => setDate(e.target.value)}
+                        required
+                        className={inputClass}
+                      />
+                    </div>
+                  )}
+
+                  {isCustom && (
+                    <div>
+                      <label className={labelClass}>
+                        <MapPin size={16} className="text-[#00B896]" />
+                        Where would you like to go? *
+                      </label>
+                      <textarea
+                        value={destination}
+                        onChange={(e) => setDestination(e.target.value)}
+                        required
+                        rows={3}
+                        placeholder="Tell us the places you'd like to visit..."
+                        className={cn(inputClass, 'resize-none')}
+                      />
+                    </div>
+                  )}
 
                   <div>
                     <label className={labelClass}>
@@ -290,7 +575,7 @@ function BookingPageContent() {
                       type="submit"
                       className="flex-2 flex-1 bg-[#00B896] hover:bg-[#009B7F] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
                     >
-                      Review & Pay
+                      {isCustom ? 'Review & Submit' : 'Review & Pay'}
                       <ChevronRight size={18} />
                     </button>
                   </div>
@@ -309,10 +594,60 @@ function BookingPageContent() {
                       <span className="text-gray-500">Tour</span>
                       <span className="font-medium text-[#1B3A2D]">{selectedTour?.name}</span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="text-gray-500">Date</span>
-                      <span className="font-medium text-[#1B3A2D]">{date}</span>
-                    </div>
+                    {isCustom ? (
+                      <>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Dates</span>
+                          <span className="font-medium text-[#1B3A2D]">{date} to {endDate}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Destination</span>
+                          <span className="font-medium text-[#1B3A2D] text-right max-w-[60%]">{destination}</span>
+                        </div>
+                      </>
+                    ) : isRoundTrip ? (
+                      <>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Arrival</span>
+                          <span className="font-medium text-[#1B3A2D]">{date} — Flight {arrivalFlight}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Departure</span>
+                          <span className="font-medium text-[#1B3A2D]">{departureDate} — Flight {departureFlight}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Accommodation</span>
+                          <span className="font-medium text-[#1B3A2D] text-right max-w-[60%]">{address}</span>
+                        </div>
+                      </>
+                    ) : isPickup ? (
+                      <>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Arrival</span>
+                          <span className="font-medium text-[#1B3A2D]">{date} — Flight {arrivalFlight}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Drop-off Address</span>
+                          <span className="font-medium text-[#1B3A2D] text-right max-w-[60%]">{address}</span>
+                        </div>
+                      </>
+                    ) : isDropoff ? (
+                      <>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Departure</span>
+                          <span className="font-medium text-[#1B3A2D]">{date} — Flight {departureFlight}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Pickup Address</span>
+                          <span className="font-medium text-[#1B3A2D] text-right max-w-[60%]">{address}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="text-gray-500">Date</span>
+                        <span className="font-medium text-[#1B3A2D]">{date}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between py-2 border-b border-gray-100">
                       <span className="text-gray-500">Guests</span>
                       <span className="font-medium text-[#1B3A2D]">{guests}</span>
@@ -330,44 +665,81 @@ function BookingPageContent() {
                       <span className="font-medium text-[#1B3A2D]">{personalData.phone}</span>
                     </div>
                     <div className="flex justify-between py-3">
-                      <span className="text-gray-700 font-bold text-base">Total Amount</span>
+                      <span className="text-gray-700 font-bold text-base">
+                        {isCustom ? 'Estimated Total' : 'Total Amount'}
+                      </span>
                       <span className="font-bold text-[#00B896] text-xl">${totalAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Payment */}
+                {/* Payment / Submission */}
                 <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100">
-                  <h2 className="text-xl font-bold text-[#1B3A2D] mb-2">Secure Payment</h2>
-                  <p className="text-gray-500 text-sm mb-5">
-                    Pay securely with PayPal. Your payment information is protected.
-                  </p>
+                  {isCustom ? (
+                    <>
+                      <h2 className="text-xl font-bold text-[#1B3A2D] mb-2">Submit for Review</h2>
+                      <p className="text-gray-500 text-sm mb-5">
+                        No payment is needed yet. Our team will review your requested destination
+                        and dates, then accept and confirm final pricing — or reach out with a
+                        reason if we can&apos;t accommodate it, so you can reschedule or choose
+                        another excursion.
+                      </p>
 
-                  {paymentError && (
-                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
-                      <AlertCircle size={18} className="text-red-500 shrink-0" />
-                      <p className="text-red-600 text-xs">{paymentError}</p>
-                    </div>
-                  )}
+                      {paymentError && (
+                        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                          <AlertCircle size={18} className="text-red-500 shrink-0" />
+                          <p className="text-red-600 text-xs">{paymentError}</p>
+                        </div>
+                      )}
 
-                  {isCreatingBooking ? (
-                    <div className="flex items-center justify-center py-6">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00B896]" />
-                      <span className="ml-3 text-gray-600 text-sm">Confirming your booking...</span>
-                    </div>
+                      {isCreatingBooking ? (
+                        <div className="flex items-center justify-center py-6">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00B896]" />
+                          <span className="ml-3 text-gray-600 text-sm">Submitting your request...</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleSubmitRequest}
+                          className="w-full bg-[#00B896] hover:bg-[#009B7F] text-white font-bold py-3.5 rounded-xl transition-colors"
+                        >
+                          Submit Request
+                        </button>
+                      )}
+                    </>
                   ) : (
-                    <PayPalScriptProvider
-                      options={{
-                        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test',
-                        currency: 'USD',
-                      }}
-                    >
-                      <PayPalButton
-                        amount={totalAmount.toFixed(2)}
-                        onSuccess={handlePaymentSuccess}
-                        onError={() => setPaymentError('Payment failed. Please try again.')}
-                      />
-                    </PayPalScriptProvider>
+                    <>
+                      <h2 className="text-xl font-bold text-[#1B3A2D] mb-2">Secure Payment</h2>
+                      <p className="text-gray-500 text-sm mb-5">
+                        Pay securely with PayPal. Your payment information is protected.
+                      </p>
+
+                      {paymentError && (
+                        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                          <AlertCircle size={18} className="text-red-500 shrink-0" />
+                          <p className="text-red-600 text-xs">{paymentError}</p>
+                        </div>
+                      )}
+
+                      {isCreatingBooking ? (
+                        <div className="flex items-center justify-center py-6">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00B896]" />
+                          <span className="ml-3 text-gray-600 text-sm">Confirming your booking...</span>
+                        </div>
+                      ) : (
+                        <PayPalScriptProvider
+                          options={{
+                            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test',
+                            currency: 'USD',
+                          }}
+                        >
+                          <PayPalButton
+                            amount={totalAmount.toFixed(2)}
+                            onSuccess={handlePaymentSuccess}
+                            onError={() => setPaymentError('Payment failed. Please try again.')}
+                          />
+                        </PayPalScriptProvider>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -391,11 +763,73 @@ function BookingPageContent() {
                     <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Tour</p>
                     <p className="font-medium text-[#1B3A2D]">{selectedTour.name}</p>
                   </div>
-                  {date && (
-                    <div>
-                      <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Date</p>
-                      <p className="font-medium text-[#1B3A2D]">{date}</p>
-                    </div>
+                  {isCustom ? (
+                    <>
+                      {date && endDate && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Dates</p>
+                          <p className="font-medium text-[#1B3A2D]">{date} to {endDate}</p>
+                        </div>
+                      )}
+                      {destination && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Destination</p>
+                          <p className="font-medium text-[#1B3A2D]">{destination}</p>
+                        </div>
+                      )}
+                    </>
+                  ) : isRoundTrip ? (
+                    <>
+                      {date && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Arrival</p>
+                          <p className="font-medium text-[#1B3A2D]">{date}{arrivalFlight && ` — ${arrivalFlight}`}</p>
+                        </div>
+                      )}
+                      {departureDate && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Departure</p>
+                          <p className="font-medium text-[#1B3A2D]">{departureDate}{departureFlight && ` — ${departureFlight}`}</p>
+                        </div>
+                      )}
+                    </>
+                  ) : isPickup ? (
+                    <>
+                      {date && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Arrival</p>
+                          <p className="font-medium text-[#1B3A2D]">{date}{arrivalFlight && ` — ${arrivalFlight}`}</p>
+                        </div>
+                      )}
+                      {address && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Drop-off Address</p>
+                          <p className="font-medium text-[#1B3A2D]">{address}</p>
+                        </div>
+                      )}
+                    </>
+                  ) : isDropoff ? (
+                    <>
+                      {date && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Departure</p>
+                          <p className="font-medium text-[#1B3A2D]">{date}{departureFlight && ` — ${departureFlight}`}</p>
+                        </div>
+                      )}
+                      {address && (
+                        <div>
+                          <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Pickup Address</p>
+                          <p className="font-medium text-[#1B3A2D]">{address}</p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    date && (
+                      <div>
+                        <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Date</p>
+                        <p className="font-medium text-[#1B3A2D]">{date}</p>
+                      </div>
+                    )
                   )}
                   <div>
                     <p className="text-gray-400 text-xs uppercase font-semibold mb-1">Guests</p>

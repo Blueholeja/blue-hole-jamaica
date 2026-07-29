@@ -25,3 +25,56 @@ body {
   color: #1a1a1a;
   background: #ffffff;
 }
+
+/* ── Page transitions ──────────────────────────────────────────── */
+::view-transition-old(page-transition) {
+  animation:
+    150ms ease-out both pt-fade-out,
+    250ms ease-out both pt-slide-out;
+}
+::view-transition-new(page-transition) {
+  animation:
+    220ms ease-out 100ms both pt-fade-in,
+    320ms ease-out both pt-slide-in;
+}
+
+@keyframes pt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes pt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pt-slide-out {
+  to {
+    transform: translateY(-6px);
+  }
+}
+@keyframes pt-slide-in {
+  from {
+    transform: translateY(10px);
+  }
+}
+
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

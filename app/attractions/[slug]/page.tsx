@@ -4,6 +4,10 @@ import { notFound } from 'next/navigation'
 import { Clock, CheckCircle, ArrowLeft, MessageCircle, Star } from 'lucide-react'
 import { getTourBySlug, TOURS } from '@/lib/tours-data'
 import BookingModal from '@/components/BookingModal'
+import CustomAttractionBooking from '@/components/CustomAttractionBooking'
+import RoundTripBooking from '@/components/RoundTripBooking'
+import AirportPickupBooking from '@/components/AirportPickupBooking'
+import AirportDropoffBooking from '@/components/AirportDropoffBooking'
 
 export async function generateStaticParams() {
   return TOURS.map((tour) => ({ slug: tour.slug }))
@@ -31,6 +35,10 @@ export default async function AttractionDetailPage({
 
   const related = TOURS.filter((t) => t.slug !== tour.slug && t.category === tour.category).slice(0, 3)
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '18767234567'
+  const isService = ['airport-pickup', 'airport-dropoff', 'round-trip-transfers'].includes(tour.slug)
+  const listingHref = isService ? '/attractions' : '/excursions'
+  const listingLabel = isService ? 'Services' : 'Excursions'
+  const hasInlineForm = ['custom-attractions', 'round-trip-transfers', 'airport-pickup', 'airport-dropoff'].includes(tour.slug)
 
   return (
     <div className="pt-16">
@@ -66,7 +74,7 @@ export default async function AttractionDetailPage({
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Link href="/" className="hover:text-[#00B896] transition-colors">Home</Link>
             <span>/</span>
-            <Link href="/attractions" className="hover:text-[#00B896] transition-colors">Attractions</Link>
+            <Link href={listingHref} className="hover:text-[#00B896] transition-colors">{listingLabel}</Link>
             <span>/</span>
             <span className="text-[#1B3A2D] font-medium">{tour.name}</span>
           </div>
@@ -76,17 +84,23 @@ export default async function AttractionDetailPage({
       {/* Content */}
       <section className="py-12 sm:py-16 bg-[#F0F9F5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className={`grid grid-cols-1 gap-8 ${hasInlineForm ? 'max-w-3xl mx-auto' : 'lg:grid-cols-3'}`}>
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className={`space-y-8 ${hasInlineForm ? '' : 'lg:col-span-2'}`}>
               {/* Back Link */}
               <Link
-                href="/attractions"
+                href={listingHref}
                 className="inline-flex items-center gap-2 text-gray-500 hover:text-[#00B896] transition-colors text-sm"
               >
                 <ArrowLeft size={16} />
-                Back to attractions
+                Back to {listingLabel.toLowerCase()}
               </Link>
+
+              {/* Inline Booking Form */}
+              {tour.slug === 'custom-attractions' && <CustomAttractionBooking />}
+              {tour.slug === 'round-trip-transfers' && <RoundTripBooking />}
+              {tour.slug === 'airport-pickup' && <AirportPickupBooking />}
+              {tour.slug === 'airport-dropoff' && <AirportDropoffBooking />}
 
               {/* Description */}
               <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100">
@@ -129,6 +143,7 @@ export default async function AttractionDetailPage({
             </div>
 
             {/* Sidebar / Booking CTA */}
+            {!hasInlineForm && (
             <div className="space-y-6">
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-24">
                 <div className="text-center mb-5">
@@ -184,6 +199,7 @@ export default async function AttractionDetailPage({
                 </p>
               </div>
             </div>
+            )}
           </div>
 
           {/* Related Tours */}
