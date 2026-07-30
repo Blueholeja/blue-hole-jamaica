@@ -9,6 +9,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('tours')
       .select('*')
+      .order('display_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true })
 
     if (error) {

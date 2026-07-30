@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
-import { STATUS_LABELS, parseReservationRoute, parseFlightInfo, getReservationCategory, Reservation } from '@/lib/reservation-utils'
+import { STATUS_LABELS, parseReservationRoute, parseFlightInfo, parseCustomerNote, getReservationCategory, Reservation } from '@/lib/reservation-utils'
 import PrintButton from '@/components/PrintButton'
 
 export default async function PrintReservationPage({
@@ -87,7 +87,7 @@ export default async function PrintReservationPage({
           <section>
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Special Requests</h2>
             <p className="text-sm text-gray-700 whitespace-pre-wrap border border-gray-200 rounded-lg p-3 bg-gray-50 print:bg-white">
-              {reservation.special_requests || 'None'}
+              {parseCustomerNote(reservation) || 'None'}
             </p>
           </section>
 

@@ -15,6 +15,7 @@
  *   images text[],
  *   highlights text[],
  *   available boolean default true,
+ *   display_order integer, -- explicit sort order; NULL sorts last (new tours append at the end)
  *   created_at timestamp with time zone default now()
  * );
  *

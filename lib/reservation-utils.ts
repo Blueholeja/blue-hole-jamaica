@@ -84,6 +84,25 @@ export function parseFlightInfo(reservation: Reservation): string | null {
   return matches.join(' / ')
 }
 
+/**
+ * The booking forms fold system-generated trip metadata (Destination, Dates,
+ * Arrival, Departure, Accommodation, Pickup/Drop-off Address, Trip Type,
+ * Pickup, Drop-off, Return) into special_requests alongside the customer's
+ * own optional note, since there's no dedicated column for it. This strips
+ * those known metadata lines out so only the customer's actual free-text
+ * note remains — blank when they didn't write anything.
+ */
+const METADATA_LINE = /^(Destination|Dates|Arrival|Departure|Accommodation|Drop-off Address|Pickup Address|Trip Type|Pickup|Drop-off|Return):/i
+
+export function parseCustomerNote(reservation: Reservation): string {
+  const text = reservation.special_requests || ''
+  return text
+    .split('\n')
+    .filter((line) => !METADATA_LINE.test(line.trim()))
+    .join('\n')
+    .trim()
+}
+
 /** Slugs shown under the site's "Services" tab (transport, not excursions). */
 export const SERVICE_SLUGS = ['airport-pickup', 'airport-dropoff', 'round-trip-transfers', 'charter']
 

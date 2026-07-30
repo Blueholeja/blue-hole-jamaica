@@ -22,6 +22,7 @@ import {
   STATUS_LABELS,
   parseReservationRoute,
   parseFlightInfo,
+  parseCustomerNote,
   getReservationCategory,
   CATEGORY_COLORS,
   ReservationCategory,
@@ -474,7 +475,7 @@ export default function AdminBookingsPage() {
               </DetailSection>
 
               <DetailSection title="Special Requests">
-                <p className="text-sm text-gray-600 whitespace-pre-wrap">{viewing.special_requests || 'None'}</p>
+                <p className="text-sm text-gray-600 whitespace-pre-wrap">{parseCustomerNote(viewing) || 'None'}</p>
               </DetailSection>
 
               {viewing.decline_reason && (
