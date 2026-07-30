@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Plus, Edit2, Trash2, X } from 'lucide-react'
 import { TOURS } from '@/lib/tours-data'
@@ -10,8 +10,12 @@ import { cn } from '@/lib/utils'
 
 const inputClass = 'w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent'
 
+function isService(t: Tour) {
+  return SERVICE_SLUGS.includes(t.slug)
+}
+
 export default function AdminServicesPage() {
-  const [services, setServices] = useState<Tour[]>(TOURS.filter((t) => SERVICE_SLUGS.includes(t.slug)))
+  const [services, setServices] = useState<Tour[]>(TOURS.filter(isService))
   const [showForm, setShowForm] = useState(false)
   const [editingService, setEditingService] = useState<Tour | null>(null)
   const [formData, setFormData] = useState<Partial<Tour>>({
@@ -25,6 +29,19 @@ export default function AdminServicesPage() {
     highlights: [],
     images: [],
   })
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const res = await fetch('/api/tours')
+        const data = await res.json()
+        if (Array.isArray(data)) setServices(data.filter(isService))
+      } catch {
+        // keep static fallback already in state
+      }
+    }
+    fetchServices()
+  }, [])
 
   function openAddForm() {
     setEditingService(null)

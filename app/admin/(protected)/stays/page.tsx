@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Plus, Edit2, Trash2, X } from 'lucide-react'
 import { TOURS } from '@/lib/tours-data'
@@ -9,8 +9,12 @@ import { cn } from '@/lib/utils'
 
 const inputClass = 'w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent'
 
+function isStay(t: Tour) {
+  return t.category === 'overnight'
+}
+
 export default function AdminStaysPage() {
-  const [stays, setStays] = useState<Tour[]>(TOURS.filter((t) => t.category === 'overnight'))
+  const [stays, setStays] = useState<Tour[]>(TOURS.filter(isStay))
   const [showForm, setShowForm] = useState(false)
   const [editingStay, setEditingStay] = useState<Tour | null>(null)
   const [formData, setFormData] = useState<Partial<Tour>>({
@@ -24,6 +28,19 @@ export default function AdminStaysPage() {
     highlights: [],
     images: [],
   })
+
+  useEffect(() => {
+    async function fetchStays() {
+      try {
+        const res = await fetch('/api/tours')
+        const data = await res.json()
+        if (Array.isArray(data)) setStays(data.filter(isStay))
+      } catch {
+        // keep static fallback already in state
+      }
+    }
+    fetchStays()
+  }, [])
 
   function openAddForm() {
     setEditingStay(null)

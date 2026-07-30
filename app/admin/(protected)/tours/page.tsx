@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Plus, Edit2, Trash2, X, CheckCircle, XCircle } from 'lucide-react'
 import { TOURS } from '@/lib/tours-data'
@@ -10,10 +10,12 @@ import { cn } from '@/lib/utils'
 
 const inputClass = 'w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent'
 
-const EXCURSION_TOURS = TOURS.filter((t) => !SERVICE_SLUGS.includes(t.slug) && t.category !== 'overnight')
+function isExcursion(t: Tour) {
+  return !SERVICE_SLUGS.includes(t.slug) && t.category !== 'overnight'
+}
 
 export default function AdminToursPage() {
-  const [tours, setTours] = useState<Tour[]>(EXCURSION_TOURS)
+  const [tours, setTours] = useState<Tour[]>(TOURS.filter(isExcursion))
   const [showForm, setShowForm] = useState(false)
   const [editingTour, setEditingTour] = useState<Tour | null>(null)
   const [formData, setFormData] = useState<Partial<Tour>>({
@@ -27,6 +29,19 @@ export default function AdminToursPage() {
     highlights: [],
     images: [],
   })
+
+  useEffect(() => {
+    async function fetchTours() {
+      try {
+        const res = await fetch('/api/tours')
+        const data = await res.json()
+        if (Array.isArray(data)) setTours(data.filter(isExcursion))
+      } catch {
+        // keep static fallback already in state
+      }
+    }
+    fetchTours()
+  }, [])
 
   function openAddForm() {
     setEditingTour(null)
