@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
-import { STATUS_LABELS, parseReservationRoute, parseFlightInfo, Reservation } from '@/lib/reservation-utils'
+import { STATUS_LABELS, parseReservationRoute, parseFlightInfo, getReservationCategory, Reservation } from '@/lib/reservation-utils'
 import PrintButton from '@/components/PrintButton'
 
 export default async function PrintReservationPage({
@@ -76,6 +76,7 @@ export default async function PrintReservationPage({
           <section>
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Trip Details</h2>
             <Row label="Service Booked" value={reservation.tours?.name || '—'} />
+            <Row label="Type" value={getReservationCategory(reservation)} />
             <Row label="Pickup Location" value={pickup} />
             <Row label="Destination" value={destination} />
             <Row label="Date" value={reservation.date} />

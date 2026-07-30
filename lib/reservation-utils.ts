@@ -83,3 +83,19 @@ export function parseFlightInfo(reservation: Reservation): string | null {
   if (matches.length === 0) return null
   return matches.join(' / ')
 }
+
+/** Slugs shown under the site's "Services" tab (transport, not excursions). */
+export const SERVICE_SLUGS = ['airport-pickup', 'airport-dropoff', 'round-trip-transfers', 'charter']
+
+export type ReservationCategory = 'Service' | 'Excursion'
+
+/** Separates transport Services (Airport Pickup/Drop-off, Round Trip, Charter) from Excursions. */
+export function getReservationCategory(reservation: Reservation): ReservationCategory {
+  const slug = reservation.tours?.slug
+  return slug && SERVICE_SLUGS.includes(slug) ? 'Service' : 'Excursion'
+}
+
+export const CATEGORY_COLORS: Record<ReservationCategory, string> = {
+  Service: 'bg-purple-100 text-purple-700',
+  Excursion: 'bg-teal-100 text-teal-700',
+}

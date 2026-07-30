@@ -22,15 +22,20 @@ import {
   STATUS_LABELS,
   parseReservationRoute,
   parseFlightInfo,
+  getReservationCategory,
+  CATEGORY_COLORS,
+  ReservationCategory,
 } from '@/lib/reservation-utils'
 
 type StatusFilter = 'all' | (typeof RESERVATION_STATUSES)[number]
+type CategoryFilter = 'all' | ReservationCategory
 
 export default function AdminBookingsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
   const [serviceFilter, setServiceFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -72,6 +77,7 @@ export default function AdminBookingsPage() {
   const filtered = useMemo(() => {
     return reservations.filter((r) => {
       if (statusFilter !== 'all' && r.status !== statusFilter) return false
+      if (categoryFilter !== 'all' && getReservationCategory(r) !== categoryFilter) return false
       if (serviceFilter !== 'all' && r.tours?.name !== serviceFilter) return false
       if (dateFilter && r.date !== dateFilter) return false
       if (searchQuery.trim()) {
@@ -84,10 +90,11 @@ export default function AdminBookingsPage() {
       }
       return true
     })
-  }, [reservations, statusFilter, serviceFilter, dateFilter, searchQuery])
+  }, [reservations, statusFilter, categoryFilter, serviceFilter, dateFilter, searchQuery])
 
   function clearFilters() {
     setStatusFilter('all')
+    setCategoryFilter('all')
     setServiceFilter('all')
     setDateFilter('')
     setSearchQuery('')
@@ -237,6 +244,15 @@ export default function AdminBookingsPage() {
             ))}
           </select>
           <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value as CategoryFilter)}
+            className={inputClass}
+          >
+            <option value="all">Services &amp; Excursions</option>
+            <option value="Service">Services Only</option>
+            <option value="Excursion">Excursions Only</option>
+          </select>
+          <select
             value={serviceFilter}
             onChange={(e) => setServiceFilter(e.target.value)}
             className={inputClass}
@@ -252,7 +268,7 @@ export default function AdminBookingsPage() {
             onChange={(e) => setDateFilter(e.target.value)}
             className={inputClass}
           />
-          {(statusFilter !== 'all' || serviceFilter !== 'all' || dateFilter || searchQuery) && (
+          {(statusFilter !== 'all' || categoryFilter !== 'all' || serviceFilter !== 'all' || dateFilter || searchQuery) && (
             <button
               onClick={clearFilters}
               className="text-sm text-gray-500 hover:text-[#00B896] px-3 py-2 transition-colors"
@@ -282,7 +298,7 @@ export default function AdminBookingsPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  {['Reservation ID', 'Customer', 'Service', 'Pickup', 'Destination', 'Date', 'Status', 'Actions'].map((h) => (
+                  {['Reservation ID', 'Customer', 'Service', 'Type', 'Pickup', 'Destination', 'Date', 'Status', 'Actions'].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
                       {h}
                     </th>
@@ -292,6 +308,7 @@ export default function AdminBookingsPage() {
               <tbody className="divide-y divide-gray-50">
                 {filtered.map((reservation) => {
                   const { pickup, destination } = parseReservationRoute(reservation)
+                  const category = getReservationCategory(reservation)
                   const isPending = reservation.status === 'pending'
                   const isConfirmed = reservation.status === 'confirmed'
                   const busy = actionLoading === reservation.id
@@ -307,6 +324,11 @@ export default function AdminBookingsPage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                         {reservation.tours?.name || '—'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={cn('text-xs font-medium px-2 py-1 rounded-full', CATEGORY_COLORS[category])}>
+                          {category}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 max-w-[160px] truncate" title={pickup}>
                         {pickup}
@@ -434,6 +456,7 @@ export default function AdminBookingsPage() {
 
               <DetailSection title="Trip Details">
                 <DetailRow label="Service" value={viewing.tours?.name || '—'} />
+                <DetailRow label="Type" value={getReservationCategory(viewing)} />
                 {(() => {
                   const { pickup, destination } = parseReservationRoute(viewing)
                   return (
