@@ -5,6 +5,12 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+function getSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -65,7 +71,11 @@ export async function PATCH(
               <div style="padding: 32px 24px;">
                 <h2 style="color: #1B3A2D; margin-top: 0;">Good news, ${data.customer_name}!</h2>
                 <p style="color: #555;">Your reservation has been confirmed for <strong>${data.date}</strong>.</p>
-                <p style="color: #555;">Our team will be in touch with final details ahead of your trip.</p>
+                <p style="color: #555;">The last step is payment — click below to complete it securely:</p>
+                <div style="text-align: center; margin: 24px 0;">
+                  <a href="${getSiteUrl()}/book/pay/${data.id}" style="background: #00B896; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 28px; border-radius: 10px; display: inline-block;">Complete Payment</a>
+                </div>
+                <p style="color: #555;">Once paid, our team will be in touch with final details ahead of your trip.</p>
                 <p style="color: #555; font-size: 14px;">Questions? Contact us on WhatsApp: wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '18767234567'}</p>
               </div>
             </div>

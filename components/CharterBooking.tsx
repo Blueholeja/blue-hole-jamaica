@@ -97,7 +97,7 @@ export default function CharterBooking() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to submit request')
-      router.push(`/book/confirmation/${data.id}?custom=1`)
+      router.push(`/book/confirmation/${data.id}`)
     } catch {
       setSubmitError('Something went wrong submitting your request. Please try again or contact us directly.')
     } finally {

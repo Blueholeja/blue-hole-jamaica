@@ -1,19 +1,15 @@
 import Link from 'next/link'
-import { CheckCircle, MessageCircle, Phone, Mail, Calendar, ArrowRight } from 'lucide-react'
+import { CheckCircle, MessageCircle, Phone, Mail, ArrowRight } from 'lucide-react'
 
 export default async function ConfirmationPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ custom?: string }>
 }) {
   const { id } = await params
-  const { custom } = await searchParams
-  const isCustom = custom === '1'
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '18767234567'
 
-  const customSteps = [
+  const steps = [
     {
       step: '1',
       title: 'Check your email',
@@ -27,35 +23,12 @@ export default async function ConfirmationPage({
     {
       step: '3',
       title: "We'll accept or follow up",
-      description: "If we can confirm it as requested, you'll get final pricing and next steps. If not, we'll explain why by email so you can reschedule or choose another option.",
+      description: "If we can confirm it as requested, we'll email you final pricing and a secure link to complete payment. If not, we'll explain why so you can reschedule or choose another option.",
     },
     {
       step: '4',
       title: 'Enjoy your adventure!',
-      description: "Once confirmed, we'll take care of everything else.",
-    },
-  ]
-
-  const standardSteps = [
-    {
-      step: '1',
-      title: 'Check your email',
-      description: 'We\'ve sent a booking confirmation with all the details to your email address.',
-    },
-    {
-      step: '2',
-      title: 'Our team will confirm',
-      description: 'Within 2-4 hours, our team will send you a final confirmation and your guide\'s contact details.',
-    },
-    {
-      step: '3',
-      title: "We'll be in touch",
-      description: 'Your driver/guide will contact you the day before to confirm pickup time and location.',
-    },
-    {
-      step: '4',
-      title: 'Enjoy your adventure!',
-      description: "Show up ready to explore. We'll take care of everything else.",
+      description: "Once you've paid, we'll take care of everything else.",
     },
   ]
 
@@ -68,23 +41,20 @@ export default async function ConfirmationPage({
             <CheckCircle size={40} className="text-green-500" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1B3A2D] mb-3">
-            {isCustom ? 'Request Submitted!' : 'Booking Confirmed!'}
+            Request Submitted!
           </h1>
           <p className="text-gray-500 mb-5 text-base">
-            {isCustom
-              ? "Thank you for your request. We'll review it and get back to you shortly."
-              : 'Thank you for booking with Blue Hole Jamaica. Your adventure awaits!'}
+            Thank you for your request. We&apos;ll review it and get back to you shortly.
           </p>
           <div className="bg-[#F0F9F5] rounded-xl px-5 py-3 inline-block mb-6">
             <p className="text-xs text-gray-400 uppercase font-semibold tracking-wide mb-1">
-              {isCustom ? 'Request Reference' : 'Booking Reference'}
+              Request Reference
             </p>
             <p className="font-mono font-bold text-[#1B3A2D] text-lg">{id.slice(0, 8).toUpperCase()}</p>
           </div>
           <p className="text-gray-500 text-sm">
-            {isCustom
-              ? "A confirmation email has been sent to you — we'll follow up once your request has been reviewed."
-              : 'A confirmation email has been sent to you with all the details of your booking.'}
+            A confirmation email has been sent to you — we&apos;ll follow up once your request has been reviewed.
+            No payment is needed until then.
           </p>
         </div>
 
@@ -92,7 +62,7 @@ export default async function ConfirmationPage({
         <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 mb-6">
           <h2 className="text-lg font-bold text-[#1B3A2D] mb-5">What Happens Next</h2>
           <div className="space-y-4">
-            {(isCustom ? customSteps : standardSteps).map((item) => (
+            {steps.map((item) => (
               <div key={item.step} className="flex gap-4">
                 <div className="w-8 h-8 bg-[#00B896] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                   {item.step}

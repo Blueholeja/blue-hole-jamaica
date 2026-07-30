@@ -1,12 +1,10 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { PayPalScriptProvider } from '@paypal/react-paypal-js'
 import { CheckCircle, AlertCircle, ChevronRight, Calendar, Users, User, Mail, Phone, FileText, MapPin, Plane } from 'lucide-react'
 import { TOURS } from '@/lib/tours-data'
-import PayPalButton from '@/components/PayPalButton'
 import { cn } from '@/lib/utils'
 
 interface BookingFormData {
@@ -16,7 +14,7 @@ interface BookingFormData {
   special_requests: string
 }
 
-const STEPS = ['Select Tour', 'Your Details', 'Review & Pay']
+const STEPS = ['Select Tour', 'Your Details', 'Review & Submit']
 
 function BookingPageContent() {
   const searchParams = useSearchParams()
@@ -33,8 +31,7 @@ function BookingPageContent() {
   const [address, setAddress] = useState(searchParams.get('address') || '')
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 1)
   const [personalData, setPersonalData] = useState<BookingFormData | null>(null)
-  const [bookingId, setBookingId] = useState<string | null>(null)
-  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [isCreatingBooking, setIsCreatingBooking] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
@@ -43,7 +40,6 @@ function BookingPageContent() {
   const isRoundTrip = selectedTourSlug === 'round-trip-transfers'
   const isPickup = selectedTourSlug === 'airport-pickup'
   const isDropoff = selectedTourSlug === 'airport-dropoff'
-  const steps = isCustom ? ['Select Tour', 'Your Details', 'Review & Submit'] : STEPS
   const totalAmount = selectedTour ? selectedTour.price * guests : 0
 
   const {
@@ -52,7 +48,7 @@ function BookingPageContent() {
     formState: { errors },
   } = useForm<BookingFormData>()
 
-  async function createBooking(paymentId?: string): Promise<string> {
+  async function createBooking(): Promise<string> {
     if (!selectedTour || !personalData) throw new Error('Missing booking data')
     const specialRequests = isCustom
       ? [
@@ -101,8 +97,7 @@ function BookingPageContent() {
         guests,
         special_requests: specialRequests,
         total_amount: totalAmount,
-        payment_id: paymentId,
-        payment_status: paymentId ? 'paid' : 'unpaid',
+        payment_status: 'unpaid',
         status: 'pending',
       }),
     })
@@ -126,28 +121,14 @@ function BookingPageContent() {
     setStep(3)
   }
 
-  async function handlePaymentSuccess(orderId: string) {
-    setIsCreatingBooking(true)
-    try {
-      const id = await createBooking(orderId)
-      setBookingId(id)
-      router.push(`/book/confirmation/${id}`)
-    } catch (err) {
-      setPaymentError('Payment received but booking failed. Please contact us with your payment ID: ' + orderId)
-    } finally {
-      setIsCreatingBooking(false)
-    }
-  }
-
   async function handleSubmitRequest() {
     setIsCreatingBooking(true)
-    setPaymentError(null)
+    setSubmitError(null)
     try {
       const id = await createBooking()
-      setBookingId(id)
-      router.push(`/book/confirmation/${id}?custom=1`)
-    } catch (err) {
-      setPaymentError('Something went wrong submitting your request. Please try again or contact us directly.')
+      router.push(`/book/confirmation/${id}`)
+    } catch {
+      setSubmitError('Something went wrong submitting your request. Please try again or contact us directly.')
     } finally {
       setIsCreatingBooking(false)
     }
@@ -164,7 +145,7 @@ function BookingPageContent() {
           <h1 className="text-3xl font-bold text-white text-center mb-6">Book Your Tour</h1>
           {/* Step Indicator */}
           <div className="flex items-center justify-center gap-0">
-            {steps.map((s, idx) => {
+            {STEPS.map((s, idx) => {
               const stepNum = idx + 1
               const isActive = step === stepNum
               const isCompleted = step > stepNum
@@ -186,7 +167,7 @@ function BookingPageContent() {
                       {s}
                     </span>
                   </div>
-                  {idx < steps.length - 1 && (
+                  {idx < STEPS.length - 1 && (
                     <div className={cn(
                       'w-16 sm:w-24 h-0.5 mx-2 transition-all',
                       step > stepNum ? 'bg-[#00B896]' : 'bg-white/20'
@@ -575,7 +556,7 @@ function BookingPageContent() {
                       type="submit"
                       className="flex-2 flex-1 bg-[#00B896] hover:bg-[#009B7F] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
                     >
-                      {isCustom ? 'Review & Submit' : 'Review & Pay'}
+                      Review & Submit
                       <ChevronRight size={18} />
                     </button>
                   </div>
@@ -665,81 +646,41 @@ function BookingPageContent() {
                       <span className="font-medium text-[#1B3A2D]">{personalData.phone}</span>
                     </div>
                     <div className="flex justify-between py-3">
-                      <span className="text-gray-700 font-bold text-base">
-                        {isCustom ? 'Estimated Total' : 'Total Amount'}
-                      </span>
+                      <span className="text-gray-700 font-bold text-base">Estimated Total</span>
                       <span className="font-bold text-[#00B896] text-xl">${totalAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Payment / Submission */}
+                {/* Submission */}
                 <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100">
-                  {isCustom ? (
-                    <>
-                      <h2 className="text-xl font-bold text-[#1B3A2D] mb-2">Submit for Review</h2>
-                      <p className="text-gray-500 text-sm mb-5">
-                        No payment is needed yet. Our team will review your requested destination
-                        and dates, then accept and confirm final pricing — or reach out with a
-                        reason if we can&apos;t accommodate it, so you can reschedule or choose
-                        another excursion.
-                      </p>
+                  <h2 className="text-xl font-bold text-[#1B3A2D] mb-2">Submit for Review</h2>
+                  <p className="text-gray-500 text-sm mb-5">
+                    No payment is needed yet. Our team will review your request and confirm pricing
+                    and availability — or reach out with a reason if we can&apos;t accommodate it,
+                    so you can reschedule or choose another option. Once confirmed, we&apos;ll email
+                    you a secure link to complete payment.
+                  </p>
 
-                      {paymentError && (
-                        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
-                          <AlertCircle size={18} className="text-red-500 shrink-0" />
-                          <p className="text-red-600 text-xs">{paymentError}</p>
-                        </div>
-                      )}
+                  {submitError && (
+                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                      <AlertCircle size={18} className="text-red-500 shrink-0" />
+                      <p className="text-red-600 text-xs">{submitError}</p>
+                    </div>
+                  )}
 
-                      {isCreatingBooking ? (
-                        <div className="flex items-center justify-center py-6">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00B896]" />
-                          <span className="ml-3 text-gray-600 text-sm">Submitting your request...</span>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={handleSubmitRequest}
-                          className="w-full bg-[#00B896] hover:bg-[#009B7F] text-white font-bold py-3.5 rounded-xl transition-colors"
-                        >
-                          Submit Request
-                        </button>
-                      )}
-                    </>
+                  {isCreatingBooking ? (
+                    <div className="flex items-center justify-center py-6">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00B896]" />
+                      <span className="ml-3 text-gray-600 text-sm">Submitting your request...</span>
+                    </div>
                   ) : (
-                    <>
-                      <h2 className="text-xl font-bold text-[#1B3A2D] mb-2">Secure Payment</h2>
-                      <p className="text-gray-500 text-sm mb-5">
-                        Pay securely with PayPal. Your payment information is protected.
-                      </p>
-
-                      {paymentError && (
-                        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
-                          <AlertCircle size={18} className="text-red-500 shrink-0" />
-                          <p className="text-red-600 text-xs">{paymentError}</p>
-                        </div>
-                      )}
-
-                      {isCreatingBooking ? (
-                        <div className="flex items-center justify-center py-6">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00B896]" />
-                          <span className="ml-3 text-gray-600 text-sm">Confirming your booking...</span>
-                        </div>
-                      ) : (
-                        <PayPalScriptProvider
-                          options={{
-                            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test',
-                            currency: 'USD',
-                          }}
-                        >
-                          <PayPalButton
-                            amount={totalAmount.toFixed(2)}
-                            onSuccess={handlePaymentSuccess}
-                            onError={() => setPaymentError('Payment failed. Please try again.')}
-                          />
-                        </PayPalScriptProvider>
-                      )}
-                    </>
+                    <button
+                      onClick={handleSubmitRequest}
+                      className="w-full bg-[#00B896] hover:bg-[#009B7F] text-white font-bold py-3.5 rounded-xl transition-colors"
+                    >
+                      Submit Request
+                    </button>
                   )}
                 </div>
 
