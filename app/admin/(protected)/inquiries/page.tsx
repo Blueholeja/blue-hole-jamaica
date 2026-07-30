@@ -29,9 +29,7 @@ export default function AdminInquiriesPage() {
   async function fetchInquiries() {
     setLoading(true)
     try {
-      const res = await fetch('/api/inquiries', {
-        headers: { authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}` },
-      })
+      const res = await fetch('/api/inquiries')
       const data = await res.json()
       setInquiries(Array.isArray(data) ? data : [])
     } catch {

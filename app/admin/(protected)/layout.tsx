@@ -1,11 +1,13 @@
-import { cookies } from 'next/headers'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LayoutDashboard, BookOpen, MessageSquare, Map, LogOut, ExternalLink } from 'lucide-react'
+import { isAdminAuthenticated } from '@/lib/admin-auth'
+import AdminPendingBadge from '@/components/AdminPendingBadge'
 
-async function getAdminSession() {
-  const cookieStore = await cookies()
-  return cookieStore.get('admin_session')?.value
+export const metadata: Metadata = {
+  title: 'Admin Portal | Blue Hole Jamaica',
+  robots: { index: false, follow: false },
 }
 
 const adminNavLinks = [
@@ -20,9 +22,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await getAdminSession()
-
-  if (!session) {
+  if (!(await isAdminAuthenticated())) {
     redirect('/admin/login')
   }
 
@@ -53,6 +53,7 @@ export default async function AdminLayout({
             >
               {link.icon}
               {link.label}
+              {link.href === '/admin/bookings' && <AdminPendingBadge />}
             </Link>
           ))}
         </nav>

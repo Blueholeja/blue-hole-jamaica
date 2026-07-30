@@ -22,7 +22,7 @@ export interface Booking {
   guests: number
   special_requests?: string
   decline_reason?: string
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  status: 'pending' | 'confirmed' | 'declined' | 'completed'
   payment_status: 'unpaid' | 'paid' | 'refunded'
   payment_id?: string
   total_amount: number

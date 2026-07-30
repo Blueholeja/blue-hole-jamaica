@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
+import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { TOURS } from '@/lib/tours-data'
 
 export async function GET() {
@@ -28,8 +29,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
-    if (authHeader !== `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`) {
+    if (!(await isAdminAuthenticated())) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

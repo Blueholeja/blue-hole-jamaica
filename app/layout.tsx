@@ -1,10 +1,6 @@
 import type { Metadata } from 'next'
-import { ViewTransition } from 'react'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import WhatsAppButton from '@/components/WhatsAppButton'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,12 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
-        <Navbar />
-        <main className="flex-1">
-          <ViewTransition default="page-transition">{children}</ViewTransition>
-        </main>
-        <Footer />
-        <WhatsAppButton />
+        {children}
       </body>
     </html>
   )

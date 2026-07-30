@@ -1,23 +1,30 @@
 import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
+import bcrypt from 'bcryptjs'
+import { createSessionToken, SESSION_COOKIE } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
     const adminEmail = process.env.ADMIN_EMAIL
-    const adminPassword = process.env.ADMIN_PASSWORD
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH
 
-    if (!adminEmail || !adminPassword) {
+    if (!adminEmail || !adminPasswordHash) {
       return Response.json({ error: 'Admin not configured' }, { status: 500 })
     }
 
-    if (email !== adminEmail || password !== adminPassword) {
+    if (typeof email !== 'string' || typeof password !== 'string' || email !== adminEmail) {
+      return Response.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+
+    const passwordMatches = await bcrypt.compare(password, adminPasswordHash)
+    if (!passwordMatches) {
       return Response.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
     const cookieStore = await cookies()
-    cookieStore.set('admin_session', 'authenticated', {
+    cookieStore.set(SESSION_COOKIE, createSessionToken(adminEmail), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

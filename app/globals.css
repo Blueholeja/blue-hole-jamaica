@@ -78,3 +78,15 @@ body {
     animation-delay: 0s !important;
   }
 }
+
+/* ── Print (Reservation Summary) ───────────────────────────────── */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+  }
+}

@@ -29,7 +29,7 @@
  *   guests integer default 1,
  *   special_requests text,
  *   decline_reason text,
- *   status text default 'pending', -- pending, confirmed, cancelled, completed
+ *   status text default 'pending', -- pending, confirmed, declined, completed
  *   payment_status text default 'unpaid', -- unpaid, paid, refunded
  *   payment_id text,
  *   total_amount decimal(10,2),
