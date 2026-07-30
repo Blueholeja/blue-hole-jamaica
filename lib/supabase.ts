@@ -3,9 +3,9 @@
  *
  * SETUP: Run the following SQL in your Supabase dashboard to create the required tables:
  *
- * -- Tours table
+ * -- Tours table (id is text, not uuid, to match the app's existing tour IDs)
  * create table tours (
- *   id uuid default gen_random_uuid() primary key,
+ *   id text primary key,
  *   name text not null,
  *   slug text unique not null,
  *   description text,
@@ -21,7 +21,7 @@
  * -- Bookings table
  * create table bookings (
  *   id uuid default gen_random_uuid() primary key,
- *   tour_id uuid references tours(id),
+ *   tour_id text references tours(id),
  *   customer_name text not null,
  *   email text not null,
  *   phone text,
