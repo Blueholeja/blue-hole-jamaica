@@ -5,7 +5,7 @@ import { TOURS } from '@/lib/tours-data'
 import BookingModal from '@/components/BookingModal'
 import { cn } from '@/lib/utils'
 
-const SERVICE_SLUGS = ['airport-pickup', 'airport-dropoff', 'round-trip-transfers']
+const SERVICE_SLUGS = ['airport-pickup', 'airport-dropoff', 'round-trip-transfers', 'charter']
 
 const services = SERVICE_SLUGS.map((slug) => TOURS.find((t) => t.slug === slug)).filter(
   (t): t is (typeof TOURS)[number] => Boolean(t)
@@ -46,8 +46,11 @@ export default function AttractionsPage() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                     <div className="absolute top-3 left-3">
-                      <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-500 text-white')}>
-                        Airport Transfer
+                      <span className={cn(
+                        'text-xs font-semibold px-2.5 py-1 rounded-full text-white',
+                        tour.slug === 'charter' ? 'bg-purple-500' : 'bg-blue-500'
+                      )}>
+                        {tour.slug === 'charter' ? 'Private Charter' : 'Airport Transfer'}
                       </span>
                     </div>
                     <div className="absolute top-3 right-3">
@@ -73,7 +76,7 @@ export default function AttractionsPage() {
                     >
                       View Details
                     </Link>
-                    {tour.slug === 'airport-pickup' || tour.slug === 'airport-dropoff' ? (
+                    {tour.slug === 'airport-pickup' || tour.slug === 'airport-dropoff' || tour.slug === 'charter' ? (
                       <Link
                         href={`/attractions/${tour.slug}#${tour.slug}-booking-form`}
                         className="flex-1 text-center bg-[#00B896] hover:bg-[#009B7F] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors duration-200"

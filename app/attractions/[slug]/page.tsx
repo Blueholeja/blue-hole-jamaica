@@ -8,6 +8,7 @@ import CustomAttractionBooking from '@/components/CustomAttractionBooking'
 import RoundTripBooking from '@/components/RoundTripBooking'
 import AirportPickupBooking from '@/components/AirportPickupBooking'
 import AirportDropoffBooking from '@/components/AirportDropoffBooking'
+import CharterBooking from '@/components/CharterBooking'
 
 export async function generateStaticParams() {
   return TOURS.map((tour) => ({ slug: tour.slug }))
@@ -35,10 +36,10 @@ export default async function AttractionDetailPage({
 
   const related = TOURS.filter((t) => t.slug !== tour.slug && t.category === tour.category).slice(0, 3)
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '18767234567'
-  const isService = ['airport-pickup', 'airport-dropoff', 'round-trip-transfers'].includes(tour.slug)
+  const isService = ['airport-pickup', 'airport-dropoff', 'round-trip-transfers', 'charter'].includes(tour.slug)
   const listingHref = isService ? '/attractions' : '/excursions'
   const listingLabel = isService ? 'Services' : 'Excursions'
-  const hasInlineForm = ['custom-attractions', 'round-trip-transfers', 'airport-pickup', 'airport-dropoff'].includes(tour.slug)
+  const hasInlineForm = ['custom-attractions', 'round-trip-transfers', 'airport-pickup', 'airport-dropoff', 'charter'].includes(tour.slug)
 
   return (
     <div className="pt-16">
@@ -101,6 +102,7 @@ export default async function AttractionDetailPage({
               {tour.slug === 'round-trip-transfers' && <RoundTripBooking />}
               {tour.slug === 'airport-pickup' && <AirportPickupBooking />}
               {tour.slug === 'airport-dropoff' && <AirportDropoffBooking />}
+              {tour.slug === 'charter' && <CharterBooking />}
 
               {/* Description */}
               <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100">

@@ -22,12 +22,12 @@ export default async function ConfirmationPage({
     {
       step: '2',
       title: 'Our team will review it',
-      description: 'We\'ll check your requested destination, dates, and availability, usually within 24 hours.',
+      description: 'We\'ll check the details you submitted, usually within 24 hours.',
     },
     {
       step: '3',
       title: "We'll accept or follow up",
-      description: "If we can confirm it as requested, you'll get final pricing and next steps. If not, we'll explain why by email so you can reschedule or choose another excursion.",
+      description: "If we can confirm it as requested, you'll get final pricing and next steps. If not, we'll explain why by email so you can reschedule or choose another option.",
     },
     {
       step: '4',
@@ -72,7 +72,7 @@ export default async function ConfirmationPage({
           </h1>
           <p className="text-gray-500 mb-5 text-base">
             {isCustom
-              ? "Thank you for your custom trip request. We'll review it and get back to you shortly."
+              ? "Thank you for your request. We'll review it and get back to you shortly."
               : 'Thank you for booking with Blue Hole Jamaica. Your adventure awaits!'}
           </p>
           <div className="bg-[#F0F9F5] rounded-xl px-5 py-3 inline-block mb-6">

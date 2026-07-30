@@ -312,6 +312,28 @@ export const TOURS: Tour[] = [
     available: true,
   },
   {
+    id: '17',
+    name: 'Charter',
+    slug: 'charter',
+    description: 'Private transportation from Point A to Point B, on your schedule. Choose a one-way or round trip journey to any destination you need — not a fixed tour or airport run, just you and where you need to be.',
+    duration: 'As needed',
+    price: 80,
+    category: 'day_tour',
+    images: [
+      '/images/tours/custom-tours.jpg',
+      '/images/tours/airport.jpg',
+    ],
+    highlights: [
+      'Private point-to-point transportation',
+      'One-way or round trip options',
+      'Destination of your choice',
+      'Professional licensed driver',
+      'Comfortable air-conditioned vehicle',
+      'Flexible pickup times',
+    ],
+    available: true,
+  },
+  {
     id: '7',
     name: 'Blue Hole Overnight Stay',
     slug: 'blue-hole-overnight',
