@@ -45,7 +45,7 @@ export default function RoomsPage() {
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
               <div className="relative h-56">
                 <Image
-                  src="/images/tours/overnight.jpg"
+                  src="/images/rooms/single-room.jpg"
                   alt="Single Room"
                   fill
                   className="object-cover"
@@ -64,7 +64,7 @@ export default function RoomsPage() {
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
               <div className="relative h-56">
                 <Image
-                  src="/images/tours/overnight.jpg"
+                  src="/images/rooms/double-room.jpg"
                   alt="Double Room"
                   fill
                   className="object-cover"
