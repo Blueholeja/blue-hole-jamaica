@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { AirVent, Tv, Armchair, Refrigerator, Wifi, CircleParking, ArrowRight, CheckCircle } from 'lucide-react'
+import { AirVent, Tv, Armchair, Refrigerator, Wifi, CircleParking, ArrowRight, CheckCircle, Droplets, Leaf, Cigarette } from 'lucide-react'
 import { ROOM_PRICING } from '@/lib/room-utils'
 
 export const metadata: Metadata = {
@@ -16,6 +16,12 @@ const AMENITIES = [
   { icon: Refrigerator, label: 'Refrigerator' },
   { icon: Wifi, label: 'Free Wi-Fi' },
   { icon: CircleParking, label: 'Parking Available' },
+]
+
+const GUEST_BENEFITS = [
+  { icon: Droplets, label: 'Complimentary access to Blue Hole Mineral Spring' },
+  { icon: Leaf, label: "Complimentary access to Wabba's Weed Farm Adventure" },
+  { icon: Cigarette, label: 'Unlimited on-site smoking during the farm experience (subject to local laws and property rules)' },
 ]
 
 const singlePricing = ROOM_PRICING.filter((p) => p.room_type === 'single')
@@ -92,6 +98,22 @@ export default function RoomsPage() {
                     <Icon size={22} className="text-[#00B896]" />
                   </div>
                   <span className="text-sm text-gray-600 font-medium">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Exclusive Guest Benefits */}
+          <div className="bg-[#1B3A2D] rounded-2xl p-8 shadow-sm mb-14">
+            <h2 className="text-2xl font-bold text-white mb-1 text-center">Exclusive Guest Benefits</h2>
+            <p className="text-gray-300 text-sm text-center mb-6">Included automatically with every hotel stay</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {GUEST_BENEFITS.map(({ icon: Icon, label }) => (
+                <div key={label} className="flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+                    <Icon size={22} className="text-[#00B896]" />
+                  </div>
+                  <span className="text-sm text-gray-200 font-medium">{label}</span>
                 </div>
               ))}
             </div>

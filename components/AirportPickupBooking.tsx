@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calendar, Users, MapPin, Plane, ChevronRight, MessageCircle } from 'lucide-react'
+import { Calendar, Users, MapPin, Plane, ChevronRight, MessageCircle, GlassWater } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function AirportPickupBooking() {
@@ -32,6 +32,18 @@ export default function AirportPickupBooking() {
       <p className="text-gray-500 text-sm mb-6">
         Give us your flight details and where you&apos;re staying — we&apos;ll be waiting at arrivals.
       </p>
+
+      <div className="flex items-start gap-3 bg-[#F0F9F5] border border-[#00B896]/20 rounded-xl px-4 py-3.5 mb-6">
+        <GlassWater size={18} className="text-[#00B896] mt-0.5 shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-[#1B3A2D]">Complimentary Welcome Refreshments</p>
+          <p className="text-xs text-gray-500 mt-1">
+            Every airport transfer includes your choice of Red Stripe Beer &amp; Water or Rum Punch &amp; Water.
+            Guests who smoke receive 2 grams of complimentary herb upon arrival (only where legally permitted
+            and in accordance with applicable laws).
+          </p>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-2 gap-4">
