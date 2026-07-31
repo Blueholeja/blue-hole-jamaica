@@ -114,8 +114,14 @@ export default function AdminRoomBookingsPage() {
   const occupiedToday = useMemo(() => {
     const map = new Map<string, RoomBooking>()
     for (const b of bookings) {
-      if (b.status === 'cancelled') continue
-      if (b.check_in <= today && b.check_out > today && b.room_id) map.set(b.room_id, b)
+      if (b.status === 'cancelled' || b.checked_out || !b.room_id) continue
+      // A room counts as occupied once it's booked for today's date range,
+      // or as soon as the admin marks it paid in full (guest has settled up
+      // and is on-site), even if the stored dates haven't technically ticked
+      // over to check-in day yet.
+      const withinStay = b.check_in <= today && b.check_out > today
+      const paidInFull = b.payment_status === 'paid_in_full'
+      if (withinStay || paidInFull) map.set(b.room_id, b)
     }
     return map
   }, [bookings, today])
