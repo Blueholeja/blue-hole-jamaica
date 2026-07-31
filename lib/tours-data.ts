@@ -10,6 +10,7 @@ export const TOURS: Tour[] = [
     price: 85,
     category: 'day_tour',
     images: [
+      '/images/tours/blue-hole-aerial-ladder.jpg',
       '/images/tours/blue-hole.jpg',
       '/images/tours/dunns-river.jpg',
       '/images/tours/custom-tours.jpg',
@@ -33,6 +34,7 @@ export const TOURS: Tour[] = [
     price: 65,
     category: 'day_tour',
     images: [
+      '/images/tours/wabbas-adventure-field.jpg',
       '/images/tours/wabbas-adventure.jpg',
       '/images/tours/blue-hole.jpg',
       '/images/tours/custom-tours.jpg',
@@ -56,6 +58,7 @@ export const TOURS: Tour[] = [
     price: 75,
     category: 'day_tour',
     images: [
+      '/images/tours/dunns-river-climbers.png',
       '/images/tours/dunns-river.jpg',
       '/images/tours/wabbas-adventure.jpg',
       '/images/tours/blue-hole.jpg',
@@ -78,7 +81,7 @@ export const TOURS: Tour[] = [
     duration: '3-4 Hours',
     price: 75,
     category: 'day_tour',
-    images: ['/images/tours/mayfield-falls.jpg'], // representative stock photo, not verified as this exact location — swap when real photo available
+    images: ['/images/tours/mayfield-falls-pools.jpg', '/images/tours/mayfield-falls.jpg'],
     highlights: [
       'Guided river walk through the falls',
       'Multiple natural swimming pools',
@@ -97,7 +100,7 @@ export const TOURS: Tour[] = [
     duration: '3-4 Hours',
     price: 70,
     category: 'day_tour',
-    images: ['/images/tours/ys-falls.jpg'], // representative stock photo, not verified as this exact location — swap when real photo available
+    images: ['/images/tours/ys-falls-tiers.jpg', '/images/tours/ys-falls.jpg'],
     highlights: [
       'Jitney ride to the falls',
       'Seven-tiered waterfall swimming',
@@ -116,7 +119,7 @@ export const TOURS: Tour[] = [
     duration: '2-3 Hours',
     price: 65,
     category: 'day_tour',
-    images: ['/images/tours/black-river-safari.jpg'],
+    images: ['/images/tours/black-river-crocodile.webp', '/images/tours/black-river-safari.jpg'],
     highlights: [
       'Guided boat safari on Black River',
       'Crocodile and birdlife sightings',
@@ -135,7 +138,7 @@ export const TOURS: Tour[] = [
     duration: '2-3 Hours',
     price: 60,
     category: 'day_tour',
-    images: ['/images/tours/benta-river.jpg'], // representative stock photo, not verified as this exact location — swap when real photo available
+    images: ['/images/tours/benta-river-falls.jpg', '/images/tours/benta-river.jpg'],
     highlights: [
       'Swimming in calm river water',
       'Tubing option available',
@@ -154,7 +157,7 @@ export const TOURS: Tour[] = [
     duration: '2-3 Hours',
     price: 50,
     category: 'day_tour',
-    images: ['/images/tours/ricks-cafe.jpg'],
+    images: ['/images/tours/ricks-cafe-sunset.jpg', '/images/tours/ricks-cafe.jpg'],
     highlights: [
       'Cliff jumping and diving shows',
       'West End cliffside setting',
@@ -173,7 +176,7 @@ export const TOURS: Tour[] = [
     duration: 'Half Day',
     price: 45,
     category: 'day_tour',
-    images: ['/images/tours/seven-mile-beach.jpg'],
+    images: ['/images/tours/seven-mile-beach-aerial.jpg', '/images/tours/seven-mile-beach.jpg'],
     highlights: [
       'White sand beach access',
       'Calm, swimmable turquoise water',
@@ -192,7 +195,7 @@ export const TOURS: Tour[] = [
     duration: 'Full Day',
     price: 90,
     category: 'day_tour',
-    images: ['/images/tours/pelican-bar.jpg'], // representative stock photo, not verified as this exact location — swap when real photo available
+    images: ['/images/tours/pelican-bar-swim.jpg', '/images/tours/pelican-bar.jpg'],
     highlights: [
       'Boat ride out to the sandbar bar',
       'Swimming in open sea water',
@@ -211,7 +214,7 @@ export const TOURS: Tour[] = [
     duration: 'Half Day',
     price: 60,
     category: 'day_tour',
-    images: ['/images/tours/bob-marley-museum.jpg'],
+    images: ['/images/tours/bob-marley-statue.jpg', '/images/tours/bob-marley-museum.jpg'],
     highlights: [
       'Guided museum tour',
       "Bob Marley's former home and studio",
@@ -231,6 +234,7 @@ export const TOURS: Tour[] = [
     price: 120,
     category: 'day_tour',
     images: [
+      '/images/tours/custom-attraction-rafting.jpg',
       '/images/tours/custom-tours.jpg',
       '/images/tours/blue-hole.jpg',
       '/images/tours/wabbas-adventure.jpg',
@@ -320,6 +324,7 @@ export const TOURS: Tour[] = [
     price: 80,
     category: 'day_tour',
     images: [
+      '/images/tours/charter-chauffeur.jpg',
       '/images/tours/custom-tours.jpg',
       '/images/tours/airport.jpg',
     ],
