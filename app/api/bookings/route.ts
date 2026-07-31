@@ -1,9 +1,7 @@
 import { NextRequest, after } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,8 +55,7 @@ export async function POST(request: NextRequest) {
     // isn't stuck waiting on the browser for two Resend API round-trips.
     after(async () => {
       try {
-        await resend.emails.send({
-          from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+        await sendEmail({
           to: email,
           subject: `Booking Confirmation — ${data.id.slice(0, 8).toUpperCase()} | Blue Hole Jamaica`,
           html: `
@@ -93,8 +90,7 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        await resend.emails.send({
-          from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+        await sendEmail({
           to: process.env.ADMIN_EMAIL || 'admin@blueholejamaica.com',
           subject: `New Booking: ${customer_name} — ${date}`,
           html: `

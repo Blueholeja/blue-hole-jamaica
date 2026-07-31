@@ -1,9 +1,7 @@
 import { NextRequest, after } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 function getSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
@@ -62,8 +60,7 @@ export async function PATCH(
     after(async () => {
       if (body.status === 'confirmed') {
         try {
-          await resend.emails.send({
-            from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+          await sendEmail({
             to: data.email,
             subject: `Your reservation has been confirmed | Blue Hole Jamaica`,
             html: `
@@ -91,8 +88,7 @@ export async function PATCH(
 
       if (body.status === 'declined' && body.decline_reason) {
         try {
-          await resend.emails.send({
-            from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+          await sendEmail({
             to: data.email,
             subject: `Update on your reservation | Blue Hole Jamaica`,
             html: `
@@ -120,8 +116,7 @@ export async function PATCH(
 
       if (body.status === 'completed') {
         try {
-          await resend.emails.send({
-            from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+          await sendEmail({
             to: data.email,
             subject: `Thanks for traveling with us! | Blue Hole Jamaica`,
             html: `

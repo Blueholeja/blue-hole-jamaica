@@ -1,9 +1,7 @@
 import { NextRequest, after } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,8 +25,7 @@ export async function POST(request: NextRequest) {
     // form doesn't pause on two Resend API round-trips.
     after(async () => {
       try {
-        await resend.emails.send({
-          from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+        await sendEmail({
           to: email,
           subject: 'Thanks for contacting Blue Hole Jamaica!',
           html: `
@@ -49,8 +46,7 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        await resend.emails.send({
-          from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+        await sendEmail({
           to: process.env.ADMIN_EMAIL || 'admin@blueholejamaica.com',
           subject: `New Inquiry: ${subject || 'General'} from ${name}`,
           html: `

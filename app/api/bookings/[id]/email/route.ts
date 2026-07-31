@@ -1,9 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 export async function POST(
   request: NextRequest,
@@ -32,8 +30,7 @@ export async function POST(
       return Response.json({ error: 'Reservation not found' }, { status: 404 })
     }
 
-    await resend.emails.send({
-      from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+    await sendEmail({
       to: reservation.email,
       subject,
       html: `

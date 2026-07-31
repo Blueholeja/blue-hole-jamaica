@@ -1,6 +1,4 @@
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 function getSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL
@@ -25,8 +23,7 @@ function wrapper(title: string, bodyHtml: string): string {
 export async function sendVerificationEmail(email: string, name: string, token: string) {
   const link = `${getSiteUrl()}/account/verify-email/${token}`
   try {
-    await resend.emails.send({
-      from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+    await sendEmail({
       to: email,
       subject: 'Verify your email | Blue Hole Jamaica',
       html: wrapper(
@@ -48,8 +45,7 @@ export async function sendVerificationEmail(email: string, name: string, token: 
 export async function sendPasswordResetEmail(email: string, name: string, token: string) {
   const link = `${getSiteUrl()}/account/reset-password/${token}`
   try {
-    await resend.emails.send({
-      from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+    await sendEmail({
       to: email,
       subject: 'Reset your password | Blue Hole Jamaica',
       html: wrapper(

@@ -1,9 +1,7 @@
 import { NextRequest, after } from 'next/server'
-import { Resend } from 'resend'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { getCurrentCustomer } from '@/lib/customer-auth'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 export async function POST(
   request: NextRequest,
@@ -32,8 +30,7 @@ export async function POST(
 
   after(async () => {
     try {
-      await resend.emails.send({
-        from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+      await sendEmail({
         to: process.env.ADMIN_EMAIL || 'admin@blueholejamaica.com',
         subject: `Change Requested: ${booking.customer_name} — ${(booking.tours as { name?: string } | null)?.name || booking.id}`,
         html: `

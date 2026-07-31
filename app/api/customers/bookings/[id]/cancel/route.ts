@@ -1,10 +1,8 @@
 import { NextRequest, after } from 'next/server'
-import { Resend } from 'resend'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { getCurrentCustomer } from '@/lib/customer-auth'
 import { canCustomerCancel } from '@/lib/reservation-utils'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 export async function POST(
   _req: NextRequest,
@@ -44,8 +42,7 @@ export async function POST(
 
   after(async () => {
     try {
-      await resend.emails.send({
-        from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+      await sendEmail({
         to: process.env.ADMIN_EMAIL || 'admin@blueholejamaica.com',
         subject: `Booking Cancelled by Customer: ${booking.customer_name}`,
         html: `
