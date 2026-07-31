@@ -92,6 +92,60 @@
  * -- Saved booking preferences, for faster rebooking
  * alter table customers add column preferred_pickup_location text;
  * alter table customers add column typical_guests integer;
+ *
+ * -- Hotel room booking module: 10 individually tracked rooms, date-range
+ * -- stays (distinct from the single-date `bookings` table above), and an
+ * -- exclusion constraint that makes double-booking a room impossible even
+ * -- under concurrent requests.
+ * create extension if not exists btree_gist;
+ *
+ * create table rooms (
+ *   id text primary key, -- 'single-1'..'single-8', 'double-1', 'double-2'
+ *   room_number text not null,
+ *   type text not null, -- 'single' | 'double'
+ *   created_at timestamp with time zone default now()
+ * );
+ *
+ * create table room_pricing (
+ *   id text primary key, -- 'single_room_only', 'single_breakfast', 'single_breakfast_dinner', 'double_breakfast', 'double_breakfast_dinner'
+ *   room_type text not null,
+ *   package text not null, -- 'room_only' | 'breakfast' | 'breakfast_dinner'
+ *   label text not null,
+ *   price_per_night decimal(10,2) not null
+ * );
+ *
+ * create table room_bookings (
+ *   id uuid default gen_random_uuid() primary key,
+ *   room_id text references rooms(id),
+ *   guest_name text not null,
+ *   email text not null,
+ *   phone text,
+ *   adults integer default 1,
+ *   children integer default 0,
+ *   check_in date not null,
+ *   check_out date not null,
+ *   stay_range daterange generated always as (daterange(check_in, check_out, '[)')) stored,
+ *   room_type text not null,
+ *   package text not null,
+ *   price_per_night decimal(10,2) not null,
+ *   nights integer generated always as (check_out - check_in) stored,
+ *   total_amount decimal(10,2) not null,
+ *   deposit_amount decimal(10,2) not null,
+ *   special_requests text,
+ *   status text default 'confirmed', -- confirmed, cancelled, completed
+ *   payment_status text default 'unpaid', -- unpaid, deposit_paid, paid_in_full, refunded
+ *   payment_id text,
+ *   checked_in boolean default false,
+ *   checked_out boolean default false,
+ *   created_at timestamp with time zone default now(),
+ *   exclude using gist (room_id with =, stay_range with &&) where (status in ('confirmed', 'completed'))
+ * );
+ *
+ * alter table rooms enable row level security;
+ * alter table room_pricing enable row level security;
+ * alter table room_bookings enable row level security;
+ * -- No anon policies — all access goes through the service-role client in
+ * -- the /api/rooms/* and /api/room-bookings/* routes.
  */
 
 import { createClient } from '@supabase/supabase-js'

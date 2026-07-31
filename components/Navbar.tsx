@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/excursions', label: 'Excursions' },
   { href: '/attractions', label: 'Services' },
+  { href: '/rooms', label: 'Rooms' },
   { href: '/about', label: 'About Us' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/faq', label: 'FAQ' },

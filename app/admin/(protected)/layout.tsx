@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, BookOpen, MessageSquare, Map, Car, Hotel, LogOut, ExternalLink } from 'lucide-react'
+import { LayoutDashboard, BookOpen, MessageSquare, Map, Car, Hotel, BedDouble, LogOut, ExternalLink } from 'lucide-react'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
 import AdminPendingBadge from '@/components/AdminPendingBadge'
 import Logo from '@/components/Logo'
@@ -18,6 +18,7 @@ const adminNavLinks = [
   { href: '/admin/tours', label: 'Tours', icon: <Map size={18} /> },
   { href: '/admin/services', label: 'Services', icon: <Car size={18} /> },
   { href: '/admin/stays', label: 'Stays', icon: <Hotel size={18} /> },
+  { href: '/admin/room-bookings', label: 'Room Bookings', icon: <BedDouble size={18} /> },
 ]
 
 export default async function AdminLayout({

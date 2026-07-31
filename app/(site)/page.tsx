@@ -122,6 +122,13 @@ export default function HomePage() {
                 Reserve Your Trip
               </button>
             </BookingModal>
+            <Link
+              href="/rooms"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-7 py-3.5 rounded-lg text-sm transition-colors duration-200 border border-white/40 backdrop-blur-sm"
+            >
+              <Hotel size={16} />
+              Book Your Stay
+            </Link>
             <a
               href={`https://wa.me/${whatsappNumber}?text=Hi!%20I'd%20like%20to%20know%20more%20about%20your%20tours.`}
               target="_blank"
