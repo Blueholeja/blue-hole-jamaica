@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, after } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
 import { Resend } from 'resend'
@@ -23,46 +23,48 @@ export async function POST(request: NextRequest) {
 
     if (error) return Response.json({ error: error.message }, { status: 500 })
 
-    // Auto-reply to customer
-    try {
-      await resend.emails.send({
-        from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
-        to: email,
-        subject: 'Thanks for contacting Blue Hole Jamaica!',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #1B3A2D; padding: 24px; text-align: center;">
-              <h1 style="color: #00B896; margin: 0;">Blue Hole Jamaica</h1>
+    // Send both emails after the response is already sent, so the contact
+    // form doesn't pause on two Resend API round-trips.
+    after(async () => {
+      try {
+        await resend.emails.send({
+          from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+          to: email,
+          subject: 'Thanks for contacting Blue Hole Jamaica!',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: #1B3A2D; padding: 24px; text-align: center;">
+                <h1 style="color: #00B896; margin: 0;">Blue Hole Jamaica</h1>
+              </div>
+              <div style="padding: 32px 24px;">
+                <h2 style="color: #1B3A2D;">Hi ${name},</h2>
+                <p style="color: #555;">Thank you for reaching out! We've received your message and will get back to you within 24 hours.</p>
+                <p style="color: #555;">In the meantime, feel free to WhatsApp us at <strong>+1 (876) 723-4567</strong> for faster assistance.</p>
+              </div>
             </div>
-            <div style="padding: 32px 24px;">
-              <h2 style="color: #1B3A2D;">Hi ${name},</h2>
-              <p style="color: #555;">Thank you for reaching out! We've received your message and will get back to you within 24 hours.</p>
-              <p style="color: #555;">In the meantime, feel free to WhatsApp us at <strong>+1 (876) 723-4567</strong> for faster assistance.</p>
-            </div>
-          </div>
-        `,
-      })
-    } catch (emailError) {
-      console.error('Failed to send auto-reply:', emailError)
-    }
+          `,
+        })
+      } catch (emailError) {
+        console.error('Failed to send auto-reply:', emailError)
+      }
 
-    // Notify admin
-    try {
-      await resend.emails.send({
-        from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
-        to: process.env.ADMIN_EMAIL || 'admin@blueholejamaica.com',
-        subject: `New Inquiry: ${subject || 'General'} from ${name}`,
-        html: `
-          <p><strong>New inquiry from ${name}</strong></p>
-          <p>Email: ${email}</p>
-          <p>Phone: ${phone || 'Not provided'}</p>
-          <p>Subject: ${subject || 'General'}</p>
-          <p>Message: ${message}</p>
-        `,
-      })
-    } catch {
-      console.error('Failed to send admin notification')
-    }
+      try {
+        await resend.emails.send({
+          from: 'Blue Hole Jamaica <noreply@blueholejamaica.com>',
+          to: process.env.ADMIN_EMAIL || 'admin@blueholejamaica.com',
+          subject: `New Inquiry: ${subject || 'General'} from ${name}`,
+          html: `
+            <p><strong>New inquiry from ${name}</strong></p>
+            <p>Email: ${email}</p>
+            <p>Phone: ${phone || 'Not provided'}</p>
+            <p>Subject: ${subject || 'General'}</p>
+            <p>Message: ${message}</p>
+          `,
+        })
+      } catch {
+        console.error('Failed to send admin notification')
+      }
+    })
 
     return Response.json(data, { status: 201 })
   } catch {
