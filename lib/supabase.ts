@@ -78,6 +78,20 @@
  * -- Locked down: no anon policies. All access goes through the service-role
  * -- client in the /api/customers/* routes, never the public client.
  * alter table customers enable row level security;
+ *
+ * -- Saved favorite excursions/services per customer
+ * create table favorites (
+ *   id uuid default gen_random_uuid() primary key,
+ *   customer_id uuid references customers(id) on delete cascade not null,
+ *   tour_id text references tours(id) on delete cascade not null,
+ *   created_at timestamp with time zone default now(),
+ *   unique (customer_id, tour_id)
+ * );
+ * alter table favorites enable row level security;
+ *
+ * -- Saved booking preferences, for faster rebooking
+ * alter table customers add column preferred_pickup_location text;
+ * alter table customers add column typical_guests integer;
  */
 
 import { createClient } from '@supabase/supabase-js'

@@ -11,7 +11,7 @@ export async function GET() {
   const supabase = await createSupabaseAdminClient()
   const { data, error } = await supabase
     .from('customers')
-    .select('id, name, email, phone, email_verified, created_at')
+    .select('id, name, email, phone, email_verified, created_at, preferred_pickup_location, typical_guests')
     .eq('id', session.id)
     .maybeSingle()
 
@@ -32,17 +32,27 @@ export async function PATCH(request: NextRequest) {
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const { name, phone } = await request.json()
+    const { name, phone, preferred_pickup_location, typical_guests } = await request.json()
     if (typeof name !== 'string' || !name.trim()) {
       return Response.json({ error: 'Name is required' }, { status: 400 })
+    }
+
+    const guests = typical_guests === '' || typical_guests == null ? null : Number(typical_guests)
+    if (guests !== null && (!Number.isInteger(guests) || guests < 1)) {
+      return Response.json({ error: 'Typical guests must be a positive whole number' }, { status: 400 })
     }
 
     const supabase = await createSupabaseAdminClient()
     const { data, error } = await supabase
       .from('customers')
-      .update({ name: name.trim(), phone: phone || null })
+      .update({
+        name: name.trim(),
+        phone: phone || null,
+        preferred_pickup_location: preferred_pickup_location || null,
+        typical_guests: guests,
+      })
       .eq('id', session.id)
-      .select('id, name, email, phone, email_verified, created_at')
+      .select('id, name, email, phone, email_verified, created_at, preferred_pickup_location, typical_guests')
       .maybeSingle()
 
     if (error) return Response.json({ error: error.message }, { status: 400 })

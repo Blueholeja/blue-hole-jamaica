@@ -9,6 +9,7 @@ import RoundTripBooking from '@/components/RoundTripBooking'
 import AirportPickupBooking from '@/components/AirportPickupBooking'
 import AirportDropoffBooking from '@/components/AirportDropoffBooking'
 import CharterBooking from '@/components/CharterBooking'
+import FavoriteButton from '@/components/FavoriteButton'
 
 export async function generateStaticParams() {
   return TOURS.map((tour) => ({ slug: tour.slug }))
@@ -54,6 +55,9 @@ export default async function AttractionDetailPage({
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/70" />
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+          <FavoriteButton tourId={tour.id} />
+        </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
           <span className="bg-[#00B896] text-white text-xs font-semibold px-3 py-1 rounded-full mb-4">
             From ${tour.price}/person

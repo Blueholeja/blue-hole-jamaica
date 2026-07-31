@@ -8,6 +8,8 @@ interface CustomerInfo {
   name: string
   email: string
   phone: string | null
+  preferred_pickup_location: string | null
+  typical_guests: number | null
 }
 
 export default function ProfilePage() {
@@ -15,6 +17,8 @@ export default function ProfilePage() {
   const [customer, setCustomer] = useState<CustomerInfo | null>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [pickupLocation, setPickupLocation] = useState('')
+  const [typicalGuests, setTypicalGuests] = useState('')
   const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
 
@@ -35,6 +39,8 @@ export default function ProfilePage() {
         setCustomer(data)
         setName(data.name || '')
         setPhone(data.phone || '')
+        setPickupLocation(data.preferred_pickup_location || '')
+        setTypicalGuests(data.typical_guests != null ? String(data.typical_guests) : '')
       })
   }, [])
 
@@ -46,7 +52,12 @@ export default function ProfilePage() {
       const res = await fetch('/api/customers/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone }),
+        body: JSON.stringify({
+          name,
+          phone,
+          preferred_pickup_location: pickupLocation,
+          typical_guests: typicalGuests,
+        }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -167,6 +178,30 @@ export default function ProfilePage() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+            />
+          </div>
+          <div className="pt-2 border-t border-gray-100">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Booking Preferences</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Preferred Pickup Location</label>
+            <input
+              type="text"
+              value={pickupLocation}
+              onChange={(e) => setPickupLocation(e.target.value)}
+              placeholder="e.g. Sangster International Airport"
+              className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Typical Party Size</label>
+            <input
+              type="number"
+              min={1}
+              value={typicalGuests}
+              onChange={(e) => setTypicalGuests(e.target.value)}
+              placeholder="e.g. 4"
               className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B896] focus:border-transparent"
             />
           </div>

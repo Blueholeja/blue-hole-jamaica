@@ -1,4 +1,4 @@
-export const RESERVATION_STATUSES = ['pending', 'confirmed', 'declined', 'completed'] as const
+export const RESERVATION_STATUSES = ['pending', 'confirmed', 'declined', 'completed', 'cancelled'] as const
 export type ReservationStatus = (typeof RESERVATION_STATUSES)[number]
 
 export const STATUS_LABELS: Record<string, string> = {
@@ -6,6 +6,7 @@ export const STATUS_LABELS: Record<string, string> = {
   confirmed: 'Confirmed',
   declined: 'Declined',
   completed: 'Completed',
+  cancelled: 'Cancelled',
 }
 
 export const STATUS_COLORS: Record<string, string> = {
@@ -13,6 +14,17 @@ export const STATUS_COLORS: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
   declined: 'bg-red-100 text-red-700',
   completed: 'bg-blue-100 text-blue-700',
+  cancelled: 'bg-gray-200 text-gray-600',
+}
+
+/** A customer may only self-cancel while it's still pending review or confirmed,
+ * and only outside this window before the reservation date. */
+export const CANCELLATION_CUTOFF_HOURS = 48
+
+export function canCustomerCancel(reservation: Pick<Reservation, 'status' | 'date'>): boolean {
+  if (reservation.status !== 'pending' && reservation.status !== 'confirmed') return false
+  const cutoff = Date.now() + CANCELLATION_CUTOFF_HOURS * 60 * 60 * 1000
+  return new Date(reservation.date).getTime() > cutoff
 }
 
 export interface Reservation {

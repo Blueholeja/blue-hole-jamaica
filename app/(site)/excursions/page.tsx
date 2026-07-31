@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, ArrowRight } from 'lucide-react'
 import { TOURS } from '@/lib/tours-data'
+import FavoriteButton from '@/components/FavoriteButton'
 
 export const metadata: Metadata = {
   title: 'Excursions | Blue Hole Jamaica',
@@ -64,6 +65,9 @@ export default function ExcursionsPage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
+                    <div className="absolute top-3 left-3">
+                      <FavoriteButton tourId={tour.id} />
+                    </div>
                     <div className="absolute top-3 right-3">
                       <span className="bg-white/90 text-[#1B3A2D] text-xs font-bold px-2.5 py-1 rounded-full">
                         Est. from ${tour.price}
