@@ -60,6 +60,24 @@
  * -- Allow public insert for bookings and inquiries
  * create policy "Anyone can create a booking" on bookings for insert with check (true);
  * create policy "Anyone can create an inquiry" on inquiries for insert with check (true);
+ *
+ * -- Customers table (registered accounts; guest checkout still works without one)
+ * create table customers (
+ *   id uuid default gen_random_uuid() primary key,
+ *   email text unique not null,
+ *   password_hash text not null,
+ *   name text not null,
+ *   phone text,
+ *   email_verified boolean default false,
+ *   verification_token text,
+ *   reset_token text,
+ *   reset_token_expires timestamp with time zone,
+ *   created_at timestamp with time zone default now()
+ * );
+ *
+ * -- Locked down: no anon policies. All access goes through the service-role
+ * -- client in the /api/customers/* routes, never the public client.
+ * alter table customers enable row level security;
  */
 
 import { createClient } from '@supabase/supabase-js'

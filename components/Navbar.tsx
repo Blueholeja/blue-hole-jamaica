@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import AccountNavLink from '@/components/AccountNavLink'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -79,6 +80,7 @@ export default function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
+            <AccountNavLink />
             <a
               href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
@@ -121,7 +123,8 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/10 px-3">
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/10 px-3">
+                <AccountNavLink mobile onNavigate={() => setIsOpen(false)} />
                 <a
                   href={`https://wa.me/${whatsappNumber}`}
                   target="_blank"
