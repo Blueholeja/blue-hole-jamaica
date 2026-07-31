@@ -94,8 +94,8 @@ export default function HomePage() {
       <section className="relative h-[85vh] min-h-[580px] max-h-[860px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/images/hero/hero.jpg"
-            alt="Beautiful Blue Hole Jamaica tropical waterfall"
+            src="/images/hero/blue-hole-aerial-pool.jpg"
+            alt="Aerial view of a swimmer floating in the turquoise Blue Hole pool in Jamaica"
             fill
             className="object-cover object-center"
             priority
