@@ -146,6 +146,36 @@
  * alter table room_bookings enable row level security;
  * -- No anon policies — all access goes through the service-role client in
  * -- the /api/rooms/* and /api/room-bookings/* routes.
+ *
+ * -- Live chat between site visitors (guest or logged-in customer) and admin.
+ * -- A conversation is found by its unguessable UUID — same trust model as
+ * -- the booking confirmation/pay pages — no customer login required.
+ * create table chat_conversations (
+ *   id uuid default gen_random_uuid() primary key,
+ *   customer_id uuid references customers(id),
+ *   guest_name text not null,
+ *   guest_email text,
+ *   status text default 'open', -- open | closed
+ *   last_message_at timestamp with time zone default now(),
+ *   last_message_by text, -- 'customer' | 'admin'
+ *   unread_by_admin boolean default true,
+ *   unread_by_customer boolean default false,
+ *   created_at timestamp with time zone default now()
+ * );
+ *
+ * create table chat_messages (
+ *   id uuid default gen_random_uuid() primary key,
+ *   conversation_id uuid references chat_conversations(id) on delete cascade not null,
+ *   sender_type text not null, -- 'customer' | 'admin'
+ *   sender_name text not null,
+ *   message text not null,
+ *   created_at timestamp with time zone default now()
+ * );
+ *
+ * alter table chat_conversations enable row level security;
+ * alter table chat_messages enable row level security;
+ * -- No anon policies — all access goes through the service-role client in
+ * -- the /api/chat/* routes.
  */
 
 import { createClient } from '@supabase/supabase-js'

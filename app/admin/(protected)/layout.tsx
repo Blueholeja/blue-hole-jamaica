@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, BookOpen, MessageSquare, Map, Car, BedDouble, LogOut, ExternalLink } from 'lucide-react'
+import { LayoutDashboard, BookOpen, MessageSquare, Map, Car, BedDouble, MessagesSquare, LogOut, ExternalLink } from 'lucide-react'
 import { isAdminAuthenticated } from '@/lib/admin-auth'
 import AdminPendingBadge from '@/components/AdminPendingBadge'
+import AdminChatBadge from '@/components/AdminChatBadge'
 import Logo from '@/components/Logo'
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ const adminNavLinks = [
   { href: '/admin/tours', label: 'Tours', icon: <Map size={18} /> },
   { href: '/admin/services', label: 'Services', icon: <Car size={18} /> },
   { href: '/admin/room-bookings', label: 'Room Bookings', icon: <BedDouble size={18} /> },
+  { href: '/admin/chat', label: 'Live Chat', icon: <MessagesSquare size={18} /> },
 ]
 
 export default async function AdminLayout({
@@ -48,6 +50,7 @@ export default async function AdminLayout({
               {link.icon}
               {link.label}
               {link.href === '/admin/bookings' && <AdminPendingBadge />}
+              {link.href === '/admin/chat' && <AdminChatBadge />}
             </Link>
           ))}
         </nav>
