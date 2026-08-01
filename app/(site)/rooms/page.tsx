@@ -48,13 +48,16 @@ export default function RoomsPage() {
       <section className="py-12 sm:py-16 bg-[#F0F9F5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-14">
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            <Link
+              href="/rooms/book?type=single"
+              className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
+            >
               <div className="relative h-56">
                 <Image
                   src="/images/rooms/single-room.jpg"
                   alt="Single Room"
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <span className="absolute top-3 right-3 bg-white/90 text-[#1B3A2D] text-xs font-bold px-2.5 py-1 rounded-full">
@@ -62,18 +65,26 @@ export default function RoomsPage() {
                 </span>
               </div>
               <div className="p-6">
-                <h2 className="text-xl font-bold text-[#1B3A2D] mb-1">Single Room</h2>
+                <h2 className="text-xl font-bold text-[#1B3A2D] mb-1 group-hover:text-[#00B896] transition-colors">Single Room</h2>
                 <p className="text-gray-500 text-sm mb-4">Perfect for solo travelers or couples.</p>
-                <p className="text-[#00B896] font-bold text-lg">From $125/night</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[#00B896] font-bold text-lg">From $125/night</p>
+                  <span className="inline-flex items-center gap-1.5 text-[#00B896] font-semibold text-sm">
+                    Book Now <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            </Link>
+            <Link
+              href="/rooms/book?type=double"
+              className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
+            >
               <div className="relative h-56">
                 <Image
                   src="/images/rooms/double-room.jpg"
                   alt="Double Room"
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <span className="absolute top-3 right-3 bg-white/90 text-[#1B3A2D] text-xs font-bold px-2.5 py-1 rounded-full">
@@ -81,11 +92,16 @@ export default function RoomsPage() {
                 </span>
               </div>
               <div className="p-6">
-                <h2 className="text-xl font-bold text-[#1B3A2D] mb-1">Double Room</h2>
+                <h2 className="text-xl font-bold text-[#1B3A2D] mb-1 group-hover:text-[#00B896] transition-colors">Double Room</h2>
                 <p className="text-gray-500 text-sm mb-4">More space, includes breakfast at minimum.</p>
-                <p className="text-[#00B896] font-bold text-lg">From $170/night</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[#00B896] font-bold text-lg">From $170/night</p>
+                  <span className="inline-flex items-center gap-1.5 text-[#00B896] font-semibold text-sm">
+                    Book Now <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Amenities */}

@@ -52,6 +52,15 @@ export default function RoomBooking() {
       .catch(() => {})
   }, [])
 
+  // Pre-select the room type when arriving from a "Book Now" link on a
+  // specific room card (e.g. /rooms/book?type=double). Read directly from
+  // the URL rather than useSearchParams so this stays a plain effect and
+  // doesn't require wrapping the page in a Suspense boundary.
+  useEffect(() => {
+    const type = new URLSearchParams(window.location.search).get('type')
+    if (type === 'single' || type === 'double') setRoomType(type)
+  }, [])
+
   // Double rooms don't offer Room Only — keep the selected package valid
   // whenever the room type changes.
   useEffect(() => {
