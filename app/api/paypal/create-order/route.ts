@@ -5,7 +5,7 @@ async function getPayPalAccessToken(): Promise<string> {
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET!
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
 
-  const res = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+  const res = await fetch('https://api-m.paypal.com/v1/oauth2/token', {
     method: 'POST',
     headers: {
       Authorization: `Basic ${credentials}`,
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const accessToken = await getPayPalAccessToken()
 
-    const res = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+    const res = await fetch('https://api-m.paypal.com/v2/checkout/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
